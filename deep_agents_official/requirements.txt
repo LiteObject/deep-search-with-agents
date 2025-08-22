@@ -1,0 +1,29 @@
+# Official DeepAgents Implementation Requirements
+
+# Core DeepAgents Package
+deepagents>=0.1.0
+
+# LangChain dependencies
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-openai>=0.1.0
+langchain-core>=0.1.0
+
+# Search and web tools
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+duckduckgo-search>=3.9.0
+serpapi>=1.0.0
+
+# File system and data handling
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+pyyaml>=6.0
+
+# Optional AI providers (choose based on your needs)
+openai>=1.0.0
+anthropic>=0.8.0
+
+# Development and testing
+pytest>=7.0.0
+black>=23.0.0
