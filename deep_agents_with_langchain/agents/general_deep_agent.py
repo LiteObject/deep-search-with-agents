@@ -9,10 +9,10 @@ from typing import List, Dict, Any
 import logging
 from datetime import datetime
 
-from langchain.tools import Tool, BaseTool
-from langchain.tools import DuckDuckGoSearchRun
-from langchain.tools import WikipediaQueryRun
-from langchain.utilities import WikipediaAPIWrapper
+from langchain.tools import BaseTool
+from langchain_community.tools.ddg_search import DuckDuckGoSearchRun
+from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
+from langchain_community.utilities.wikipedia import WikipediaAPIWrapper
 
 from .base_deep_agent import BaseDeepAgent, DeepAgentResult
 
@@ -25,7 +25,7 @@ class AdaptiveSearchTool(BaseTool):
     name = "adaptive_search"
     description = "Adaptively search using the best strategy for the query type"
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         """Execute adaptive search"""
         try:
             search = DuckDuckGoSearchRun()
@@ -35,8 +35,11 @@ class AdaptiveSearchTool(BaseTool):
 
             if any(word in query_lower for word in ['how to', 'tutorial', 'guide', 'steps']):
                 # How-to query - search for tutorials and guides
-                enhanced_query = f"{query} tutorial guide how-to step by step"
-            elif any(word in query_lower for word in ['what is', 'define', 'definition', 'meaning']):
+                enhanced_query = (
+                    f"{query} tutorial guide how-to step by step"
+                )
+            elif any(word in query_lower for word in
+                     ['what is', 'define', 'definition', 'meaning']):
                 # Definition query - search for explanations
                 enhanced_query = f"{query} definition explanation overview"
             elif any(word in query_lower for word in ['best', 'top', 'review', 'compare']):
@@ -55,9 +58,9 @@ class AdaptiveSearchTool(BaseTool):
         except (ConnectionError, ValueError, AttributeError, RuntimeError) as e:
             return f"Adaptive search failed: {str(e)}"
 
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, **kwargs) -> str:
         """Async version"""
-        return self._run(query)
+        return self._run(query, **kwargs)
 
 
 class KnowledgeBaseTool(BaseTool):
@@ -66,11 +69,12 @@ class KnowledgeBaseTool(BaseTool):
     name = "knowledge_base"
     description = "Access structured knowledge and encyclopedic information"
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         """Search knowledge base"""
         try:
             # Use Wikipedia as primary knowledge base
-            wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+            wikipedia_api_wrapper = WikipediaAPIWrapper(wiki_client=None)
+            wikipedia = WikipediaQueryRun(api_wrapper=wikipedia_api_wrapper)
             results = wikipedia.run(query)
 
             return f"Knowledge base results for '{query}':\n{results}"
@@ -78,9 +82,9 @@ class KnowledgeBaseTool(BaseTool):
         except (ConnectionError, ValueError, AttributeError, RuntimeError) as e:
             return f"Knowledge base search failed: {str(e)}"
 
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, **kwargs) -> str:
         """Async version"""
-        return self._run(query)
+        return self._run(query, **kwargs)
 
 
 class ContextEnrichmentTool(BaseTool):
@@ -89,7 +93,7 @@ class ContextEnrichmentTool(BaseTool):
     name = "context_enrichment"
     description = "Enrich queries with related context and background information"
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         """Enrich query with context"""
         try:
             search = DuckDuckGoSearchRun()
@@ -111,9 +115,9 @@ class ContextEnrichmentTool(BaseTool):
         except (ConnectionError, ValueError, AttributeError, RuntimeError) as e:
             return f"Context enrichment failed: {str(e)}"
 
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, **kwargs) -> str:
         """Async version"""
-        return self._run(query)
+        return self._run(query, **kwargs)
 
 
 class SynthesisTool(BaseTool):
@@ -122,7 +126,7 @@ class SynthesisTool(BaseTool):
     name = "synthesis"
     description = "Synthesize and organize information from multiple sources"
 
-    def _run(self, information: str) -> str:
+    def _run(self, information: str, **kwargs) -> str:
         """Synthesize information"""
         try:
             # This would use LLM for synthesis
@@ -145,9 +149,9 @@ Provide a clear, comprehensive synthesis.
         except (ValueError, AttributeError, TypeError) as e:
             return f"Synthesis failed: {str(e)}"
 
-    async def _arun(self, information: str) -> str:
+    async def _arun(self, information: str, **kwargs) -> str:
         """Async version"""
-        return self._run(information)
+        return self._run(information, **kwargs)
 
 
 class GeneralDeepAgent(BaseDeepAgent):
@@ -165,7 +169,10 @@ class GeneralDeepAgent(BaseDeepAgent):
     def __init__(self, model: str = "gpt-4", temperature: float = 0.2):
         super().__init__(
             name="General Deep Agent",
-            description="Expert in comprehensive information gathering and synthesis across all domains",
+            description=(
+                "Expert in comprehensive information gathering and "
+                "synthesis across all domains"
+            ),
             model=model,
             temperature=temperature
         )
@@ -178,12 +185,17 @@ class GeneralDeepAgent(BaseDeepAgent):
     def _create_tools(self) -> List[BaseTool]:
         """Create general-purpose tools"""
         tools = [
-            AdaptiveSearchTool(),
-            KnowledgeBaseTool(),
-            ContextEnrichmentTool(),
-            SynthesisTool(),
+            AdaptiveSearchTool(
+                description="Adaptively search using the best strategy for the query type"),
+            KnowledgeBaseTool(
+                description="Access structured knowledge and encyclopedic information"),
+            ContextEnrichmentTool(
+                description="Enrich queries with related context and background information"),
+            SynthesisTool(
+                description="Synthesize and organize information from multiple sources"),
             DuckDuckGoSearchRun(),
-            WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+            WikipediaQueryRun(
+                api_wrapper=WikipediaAPIWrapper(wiki_client=None))
         ]
 
         return tools
@@ -284,20 +296,20 @@ class GeneralDeepAgent(BaseDeepAgent):
         """Classify the type of query"""
         query_lower = query.lower()
 
-        if any(word in query_lower for word in ['how to', 'tutorial', 'guide', 'steps']):
-            return "How-to/Tutorial"
-        elif any(word in query_lower for word in ['what is', 'define', 'definition']):
-            return "Definition/Explanation"
-        elif any(word in query_lower for word in ['best', 'top', 'review', 'compare']):
-            return "Comparison/Review"
-        elif any(word in query_lower for word in ['why', 'reason', 'cause']):
-            return "Causal/Explanatory"
-        elif any(word in query_lower for word in ['when', 'history', 'timeline']):
-            return "Historical/Temporal"
-        elif any(word in query_lower for word in ['where', 'location', 'place']):
-            return "Geographic/Location"
-        else:
-            return "General Information"
+        query_patterns = [
+            (['how to', 'tutorial', 'guide', 'steps'], "How-to/Tutorial"),
+            (['what is', 'define', 'definition'], "Definition/Explanation"),
+            (['best', 'top', 'review', 'compare'], "Comparison/Review"),
+            (['why', 'reason', 'cause'], "Causal/Explanatory"),
+            (['when', 'history', 'timeline'], "Historical/Temporal"),
+            (['where', 'location', 'place'], "Geographic/Location"),
+        ]
+
+        for patterns, query_type in query_patterns:
+            if any(word in query_lower for word in patterns):
+                return query_type
+
+        return "General Information"
 
     def _assess_general_quality(self, result: DeepAgentResult) -> str:
         """Assess the quality of general results"""
