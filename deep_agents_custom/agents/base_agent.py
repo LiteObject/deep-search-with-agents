@@ -6,7 +6,7 @@ Provides common functionality and interface for specialized agents.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import logging
 
@@ -31,6 +31,11 @@ class SearchSummary:
     sources: List[str]
     total_results: int
     search_time: float
+    # Add full results for better display
+    results: Optional[List[SearchResult]] = None
+    # Add citations for better referencing
+    citations: Optional[Dict[str, Dict[str, str]]] = None
+    cited_summary: Optional[str] = None
 
 
 class BaseAgent(ABC):
@@ -179,6 +184,68 @@ class BaseAgent(ABC):
         meaningful_sentences = [s.strip()
                                 for s in sentences if len(s.strip()) > 50]
         return meaningful_sentences[:max_points]
+
+    def _generate_citations(self, results: List[SearchResult]) -> Dict[str, Dict[str, str]]:
+        """
+        Generate citations for search results.
+
+        Args:
+            results: List of search results
+
+        Returns:
+            Dict: Citations with reference keys and metadata
+        """
+        citations = {}
+
+        for i, result in enumerate(results, 1):
+            ref_key = f"[{i}]"
+            citations[ref_key] = {
+                "title": result.title,
+                "url": result.url,
+                "source": result.source,
+                "timestamp": result.timestamp.strftime("%Y-%m-%d"),
+                "full_citation": f"{result.title}. {result.source}. {result.timestamp.strftime('%Y-%m-%d')}. Available at: {result.url}"
+            }
+
+        return citations
+
+    def _create_cited_summary(self, summary: str, citations: Dict[str, Dict[str, str]],
+                              results: List[SearchResult]) -> str:
+        """
+        Create a summary with proper citations.
+
+        Args:
+            summary: Original summary text
+            citations: Citation dictionary
+            results: Search results to reference
+
+        Returns:
+            str: Summary with citations
+        """
+        # Simple citation injection based on content matching
+        cited_summary = summary
+
+        # Add citations at the end of relevant sentences
+        # Limit to first 5 for readability
+        for i, result in enumerate(results[:5], 1):
+            ref_key = f"[{i}]"
+
+            # Look for keywords from the result title in the summary
+            title_words = result.title.lower().split()[
+                :3]  # First 3 words of title
+
+            for word in title_words:
+                if len(word) > 3 and word in summary.lower():
+                    # Add citation after the sentence containing this keyword
+                    sentences = cited_summary.split('.')
+                    for j, sentence in enumerate(sentences):
+                        if word in sentence.lower() and ref_key not in sentence:
+                            sentences[j] = sentence + f" {ref_key}"
+                            break
+                    cited_summary = '.'.join(sentences)
+                    break
+
+        return cited_summary
 
     def get_capabilities(self) -> Dict[str, Any]:
         """

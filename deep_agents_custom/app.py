@@ -9,10 +9,10 @@ import pandas as pd  # type: ignore
 import plotly.express as px  # type: ignore  # pylint: disable=import-error
 import streamlit as st  # type: ignore
 
-from agents.search_orchestrator import SearchOrchestrator, SearchType
-from config.settings import settings
-from utils.logger import setup_logging, get_logger
-from utils.helpers import format_search_time
+from agents.search_orchestrator import SearchOrchestrator, SearchType  # type: ignore
+from config.settings import settings  # type: ignore
+from utils.logger import setup_logging, get_logger  # type: ignore
+from utils.helpers import format_search_time  # type: ignore
 
 # Configure page
 st.set_page_config(
@@ -93,7 +93,7 @@ def create_sidebar():
     max_results = st.sidebar.slider(
         "Max Results per Agent:",
         min_value=5,
-        max_value=20,
+        max_value=50,
         value=10,
         help="Maximum number of results per agent"
     )
@@ -144,7 +144,7 @@ def create_main_interface():
     # Example queries
     st.markdown("""
     **Example queries:**
-    - 🔬 Latest artificial intelligence research
+    - 🔬 Latest artificial intelligence research 2024
     - 📰 Technology news today
     - 🌐 Climate change environmental impact
     - 💼 Remote work productivity tips
@@ -230,18 +230,72 @@ def display_single_result(result, agent_name: str):
     with col3:
         st.metric("Sources", len(result.sources))
 
-    # Summary
-    st.subheader("📋 Summary")
-    st.write(result.summary)
+    # Summary with Citations
+    st.subheader("📋 Summary with Citations")
+
+    # Show cited summary if available, otherwise regular summary
+    if hasattr(result, 'cited_summary') and result.cited_summary:
+        st.markdown(result.cited_summary)
+    elif hasattr(result, 'summary') and result.summary:
+        st.write(result.summary)
+    else:
+        st.write("No summary available for this search.")
+
+    # Citations Section
+    if hasattr(result, 'citations') and result.citations:
+        st.subheader("📚 References")
+
+        # Create a nice formatted citation list
+        citation_text = ""
+        for ref_key, citation_info in result.citations.items():
+            citation_text += f"**{ref_key}** {citation_info['full_citation']}\n\n"
+
+        st.markdown(citation_text)
+
+        # Alternative: Show as expandable section
+        with st.expander("📖 View All Citations", expanded=False):
+            for ref_key, citation_info in result.citations.items():
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    st.write(f"**{ref_key}**")
+                with col2:
+                    st.write(f"**{citation_info['title']}**")
+                    st.write(
+                        f"Source: {citation_info['source']} | Date: {citation_info['timestamp']}")
+                    st.markdown(f"🔗 [Link]({citation_info['url']})")
+                st.divider()
 
     # Key insights
-    if result.key_points:
+    if hasattr(result, 'key_points') and result.key_points:
         st.subheader("🔍 Key Insights")
         for i, point in enumerate(result.key_points, 1):
             st.write(f"{i}. {point}")
 
-    # Sources
-    if result.sources:
+    # Detailed Results
+    if hasattr(result, 'results') and result.results:
+        st.subheader("📖 Detailed Results")
+
+        # Display individual search results with better formatting
+        for i, search_result in enumerate(result.results[:10], 1):
+            with st.expander(f"Result {i}: {search_result.title}", expanded=(i <= 3)):
+                col1, col2 = st.columns([3, 1])
+
+                with col1:
+                    st.write(f"**Content:** {search_result.content}")
+                    if hasattr(search_result, 'url') and search_result.url:
+                        st.markdown(f"🔗 [Read more]({search_result.url})")
+
+                with col2:
+                    st.write(f"**Source:** {search_result.source}")
+                    if hasattr(search_result, 'relevance_score'):
+                        st.write(
+                            f"**Relevance:** {search_result.relevance_score:.1%}")
+                    if hasattr(search_result, 'timestamp'):
+                        st.write(
+                            f"**Found:** {search_result.timestamp.strftime('%H:%M:%S')}")
+
+    # Sources (fallback if no detailed results)
+    elif hasattr(result, 'sources') and result.sources:
         st.subheader("🔗 Sources")
         # Show first 10 sources
         for i, source in enumerate(result.sources[:10], 1):

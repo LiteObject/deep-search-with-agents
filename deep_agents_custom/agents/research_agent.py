@@ -75,13 +75,21 @@ class ResearchAgent(BaseAgent):
 
         search_time = time.time() - start_time
 
+        # Generate citations and cited summary
+        citations = self._generate_citations(top_results)
+        cited_summary = self._create_cited_summary(
+            summary_text, citations, top_results)
+
         return SearchSummary(
             query=query,
             summary=summary_text,
             key_points=key_points,
             sources=[r.url for r in top_results],
             total_results=len(top_results),
-            search_time=search_time
+            search_time=search_time,
+            results=top_results,  # Include full results for better display
+            citations=citations,   # Add citations
+            cited_summary=cited_summary  # Add cited summary
         )
 
     def _enhance_research_query(self, query: str,

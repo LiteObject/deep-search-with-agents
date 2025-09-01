@@ -85,13 +85,21 @@ class GeneralAgent(BaseAgent):
 
         search_time = time.time() - start_time
 
+        # Generate citations and cited summary
+        citations = self._generate_citations(top_results)
+        cited_summary = self._create_cited_summary(
+            summary, citations, top_results)
+
         return SearchSummary(
             query=query,
             summary=summary,
             key_points=key_points,
             sources=list(set(r.source for r in top_results)),
             total_results=len(top_results),
-            search_time=search_time
+            search_time=search_time,
+            results=top_results,  # Include full results for better display
+            citations=citations,   # Add citations
+            cited_summary=cited_summary  # Add cited summary
         )
 
     def _filter_general_results(
