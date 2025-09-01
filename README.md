@@ -1,380 +1,421 @@
 # Deep Search with Agents
 
-A comprehensive web search system using specialized AI agents to perform intelligent, multi-step web searches on any topic. This system leverages multiple search engines and AI-powered analysis to provide deep insights across various domains.
+A comprehensive intelligent web search system with **three distinct implementations** of AI agents that perform specialized, multi-step web searches. The system automatically selects optimal agents based on query type and provides deep insights across various domains.
 
-## Features
+## 🚀 Key Features
 
-- **Multi-Agent Search System**: Specialized agents for research, news, and general searches
-- **Multiple Search Engines**: DuckDuckGo, Tavily, and Wikipedia integration
-- **AI-Powered Intelligence**: LLM-based content summarization and insight extraction
-- **Interactive Dashboard**: Streamlit web interface with real-time results and analytics
+- **Multi-Agent Architecture**: Specialized agents for research, news, and general searches
+- **Three Implementation Approaches**: Choose from custom, LangChain, or official patterns
+- **Multiple Search Engines**: DuckDuckGo, Tavily, Wikipedia integration
+- **AI-Powered Intelligence**: LLM-based summarization and insight extraction
+- **Interactive Interfaces**: Both Streamlit web app and CLI available
+- **Privacy-Focused**: Works without external APIs using DuckDuckGo by default
 - **High Performance**: Concurrent searches with intelligent result ranking
-- **Extensible Architecture**: Easy to add new search sources and custom agents
-- **Privacy-Focused**: Works without external APIs, uses DuckDuckGo by default
+- **Extensible Architecture**: Easy to add new agents and search sources
 
-## Quick Start
+## 📁 Project Structure
 
-### 1. Install Dependencies
+```
+deep-search-with-agents/
+├── agents/                           # Main implementation (lightweight)
+│   ├── base_agent.py                # Base agent class with SearchResult/SearchSummary
+│   ├── research_agent.py            # Academic/research focused agent
+│   ├── news_agent.py                # News and current events agent  
+│   ├── general_agent.py             # General-purpose web search agent
+│   └── search_orchestrator.py       # Multi-agent coordination and auto-selection
+├── tools/                           # Search and processing tools
+│   ├── web_search.py                # WebSearchManager, DuckDuckGo, Tavily, Wikipedia
+│   └── summarizer.py                # LLMSummarizer and SimpleSummarizer
+├── config/                          # Configuration management
+│   └── settings.py                  # Application settings and validation
+├── utils/                           # Helper utilities
+│   ├── logger.py                    # Logging configuration
+│   └── helpers.py                   # Utility functions
+├── deep_agents_without_langchain/   # Standalone copy of main implementation
+│   ├── agents/                      # Mirror of main agents
+│   ├── tools/                       # Mirror of main tools
+│   ├── config/                      # Mirror of main config
+│   ├── utils/                       # Mirror of main utils
+│   ├── app.py                       # Standalone Streamlit app
+│   └── main.py                      # Standalone CLI
+├── deep_agents_with_langchain/      # LangChain-based implementation
+│   ├── agents/                      # LangChain agents with advanced features
+│   │   ├── base_deep_agent.py       # LangChain base agent
+│   │   ├── research_deep_agent.py   # Research with reflection loops
+│   │   ├── news_deep_agent.py       # News with hierarchical planning
+│   │   ├── general_deep_agent.py    # General with meta-reasoning
+│   │   ├── reflection_agent.py      # Self-reflection capabilities
+│   │   └── deep_orchestrator.py     # Advanced orchestration
+│   ├── tools/                       # LangChain-compatible tools
+│   ├── config/                      # LangChain configuration
+│   ├── utils/                       # LangChain utilities
+│   ├── app.py                       # LangChain Streamlit app
+│   └── main.py                      # LangChain CLI
+├── deep_agents_official/            # Official DeepAgents package patterns
+│   ├── agents/                      # Official implementation agents
+│   │   ├── research_deep_agent.py   # Research agent using official patterns
+│   │   ├── analysis_deep_agent.py   # Analysis agent
+│   │   ├── coding_deep_agent.py     # Coding agent
+│   │   └── deep_orchestrator.py     # Official orchestrator
+│   ├── tools/                       # Official tools
+│   ├── config/                      # Official configuration
+│   ├── demo.py                      # Official demo
+│   └── example_usage.py             # Usage examples
+├── app.py                           # Main Streamlit web interface
+├── main.py                          # Main CLI interface
+├── basic_test.py                    # Basic functionality test
+├── requirements.txt                 # Python dependencies
+├── .env.example                     # Environment variables template
+└── README.md                        # This documentation
+```
+
+## 🔧 Quick Start
+
+### Installation
 ```bash
+# Clone repository
+git clone https://github.com/LiteObject/deep-search-with-agents.git
+cd deep-search-with-agents
+
+# Create virtual environment (recommended)
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Set up Environment Variables (Optional)
-```bash
+# Optional: Set up environment variables for enhanced features
 cp .env.example .env
-# Edit .env with your API keys for enhanced features
+# Edit .env with your API keys (OPENAI_API_KEY, TAVILY_API_KEY)
 ```
 
-### 3. Run the Application
+### Running the Application
 
-**Web Interface (Recommended)**
+**🌐 Web Interface (Recommended)**
 ```bash
 streamlit run app.py
 ```
+Access at: http://localhost:8501
 
-**Command Line Interface**
+**💻 Command Line Interface**
 ```bash
 # Basic search with auto-agent selection
 python main.py search "artificial intelligence trends 2024"
 
 # Use specific agent
 python main.py search "machine learning research" --agent research
-python main.py search "tech news today" --agent news
+python main.py search "tech news today" --agent news  
+python main.py search "python programming" --agent general
 
-# Multi-agent comprehensive search
-python main.py comprehensive "quantum computing developments"
+# Multi-agent comparison
+python main.py multi "quantum computing" --agents research news general
+
+# Comprehensive search with all agents
+python main.py comprehensive "renewable energy technologies"
+
+# Show system capabilities
+python main.py capabilities
 ```
 
-## Core Agents
-
-### Research Agent
-Specialized for academic papers, studies, and scholarly content
-```python
-from agents.research_agent import ResearchAgent
-
-research_agent = ResearchAgent()
-results = research_agent.search("machine learning transformer architecture")
-```
-
-### News Agent  
-Focused on current events and breaking news
-```python
-from agents.news_agent import NewsAgent
-
-news_agent = NewsAgent()
-results = news_agent.search("AI regulation updates 2024")
-```
-
-### General Agent
-Comprehensive search across all content types
-```python
-from agents.general_agent import GeneralAgent
-
-general_agent = GeneralAgent()
-results = general_agent.search("how to learn python programming")
-```
-
-### Search Orchestrator
-Manages and coordinates multiple agents intelligently
-```python
-from agents.search_orchestrator import SearchOrchestrator
-
-orchestrator = SearchOrchestrator()
-results = orchestrator.search("renewable energy technologies")
-print(results.summary)
-```
-
-## Project Structure
-
-```
-deep-search-with-agents/
-├── agents/                 # AI agent implementations
-│   ├── base_agent.py      # Base agent class and interfaces
-│   ├── research_agent.py  # Academic/research focused agent
-│   ├── news_agent.py      # News and current events agent
-│   ├── general_agent.py   # General-purpose agent
-│   └── search_orchestrator.py  # Multi-agent coordination
-├── tools/                 # Search tools and utilities
-│   ├── web_search.py      # Web search implementations
-│   └── summarizer.py      # AI-powered summarization
-├── config/                # Configuration management
-│   └── settings.py        # Application settings
-├── utils/                 # Helper utilities
-│   ├── logger.py          # Logging configuration
-│   └── helpers.py         # Utility functions
-├── app.py                 # Streamlit web interface
-├── main.py                # CLI interface
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-└── README.md             # This comprehensive documentation
-```
-
-## Configuration
-
-The system supports multiple search engines and AI providers:
-
-### Search Engines
-- **DuckDuckGo**: Privacy-focused web search (default, no API key required)
-- **Tavily**: Professional search API (requires API key for enhanced results)
-- **Wikipedia**: Encyclopedia and reference content (no API key required)
-
-### AI Providers
-- **OpenAI**: For advanced LLM capabilities (GPT-3.5/4) - requires API key
-- **Fallback Options**: Simple text-based summarization when AI is unavailable
-
-### Environment Variables
-```bash
-# Optional - for enhanced features
-OPENAI_API_KEY=your_openai_api_key_here
-TAVILY_API_KEY=your_tavily_api_key_here
-
-# System works without these - fallbacks are provided
-```
-
-## Advanced Usage Examples
-
-### Multi-Agent Comparison
-```bash
-# Compare results from different agents
-python main.py multi "climate change" --agents research news general
-```
-
-### Comprehensive Analysis
-```bash
-# Deep dive with all available agents and sources
-python main.py comprehensive "artificial intelligence ethics"
-```
-
-### Programmatic Usage
-```python
-from agents.search_orchestrator import SearchOrchestrator
-from config.settings import Settings
-
-# Initialize with custom settings
-settings = Settings()
-orchestrator = SearchOrchestrator(settings)
-
-# Perform intelligent search
-results = orchestrator.search(
-    query="machine learning best practices",
-    max_results=10,
-    include_summary=True
-)
-
-# Access structured results
-print(f"Summary: {results.summary}")
-print(f"Sources: {len(results.sources)}")
-for source in results.sources:
-    print(f"- {source.title}: {source.url}")
-```
-
-## Customization & Extension
-
-### Adding Custom Agents
-```python
-from agents.base_agent import BaseAgent
-
-class CustomAgent(BaseAgent):
-    def __init__(self):
-        super().__init__()
-        self.name = "Custom Agent"
-        self.description = "Specialized for custom domain"
-    
-    def _get_search_strategy(self, query: str) -> dict:
-        # Implement custom search logic
-        pass
-```
-
-### Adding New Search Engines
-Edit `tools/web_search.py` to integrate new search providers:
-```python
-class CustomSearchProvider:
-    def search(self, query: str, max_results: int = 5):
-        # Implement custom search logic
-        pass
-```
-
-### Custom Summarization
-Modify `tools/summarizer.py` for domain-specific summarization:
-```python
-class DomainSpecificSummarizer:
-    def summarize(self, content: str, context: str = None):
-        # Implement specialized summarization
-        pass
-```
-
-## Performance Features
-
-- **Concurrent Processing**: Multiple searches run in parallel
-- **Smart Caching**: Avoid duplicate requests and API calls
-- **Result Ranking**: Intelligent relevance scoring and deduplication
-- **Graceful Fallbacks**: Continues working when external services are unavailable
-- **Analytics**: Performance metrics and source overlap analysis
-
-## Privacy & Security
-
-- **Privacy-First**: Uses DuckDuckGo by default (no tracking)
-- **No Data Storage**: Results are not permanently stored
-- **Optional APIs**: Core functionality works without external API keys
-- **Configurable**: Control what data is sent to external services
-- **Local Processing**: AI processing can be done locally with fallbacks
-
-## Testing
-
-Run the test suite:
-```bash
-# Run all tests
-python -m pytest tests/
-
-# Run specific test category
-python -m pytest tests/test_agents.py
-python -m pytest tests/test_search.py
-```
-
-Basic functionality test:
+**🧪 Test Basic Functionality**
 ```bash
 python basic_test.py
 ```
 
-## Contributing
+## 📚 Usage Examples
 
-We welcome contributions! Here's how to get started:
+### Basic Search with Auto-Agent Selection
+```python
+from agents.search_orchestrator import SearchOrchestrator
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Add tests for new functionality**
-4. **Ensure all tests pass**
-   ```bash
-   python -m pytest
-   ```
-5. **Submit a pull request**
+# Initialize orchestrator
+orchestrator = SearchOrchestrator()
 
-### Development Setup
-```bash
-# Clone the repository
-git clone https://github.com/LiteObject/deep-search-with-agents.git
-cd deep-search-with-agents
+# Automatic agent selection based on query
+result = orchestrator.search("artificial intelligence trends 2024")
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install development dependencies
-pip install -r requirements.txt
-pip install pytest black flake8 pylint
-
-# Run linting
-pylint agents/ tools/ config/ utils/ *.py
+# Access SearchSummary attributes
+print(f"Query: {result.query}")
+print(f"Summary: {result.summary}")
+print(f"Key Points: {result.key_points}")
+print(f"Sources: {result.sources}")
+print(f"Total Results: {result.total_results}")
+print(f"Search Time: {result.search_time:.2f}s")
 ```
 
-## License
+### Using Specific Agents
+```python
+from agents.research_agent import ResearchAgent
+from agents.news_agent import NewsAgent
+from agents.general_agent import GeneralAgent
 
-MIT License - see LICENSE file for details.
+# Academic research (papers, studies, scholarly content)
+research_agent = ResearchAgent()
+research_result = research_agent.search("machine learning transformer architecture")
+print(f"Research Summary: {research_result.summary}")
 
-## Project Status
+# Current news and events
+news_agent = NewsAgent()
+news_result = news_agent.search("AI regulation updates 2024")
+print(f"News Summary: {news_result.summary}")
 
-✅ **Production Ready** - Comprehensive error handling, logging, and documentation  
-✅ **Highly Extensible** - Easy to customize and extend for specific needs  
-✅ **Multi-Interface** - Both CLI and web interfaces ready to use  
-✅ **AI-Powered** - Smart agent selection and content processing  
-✅ **Privacy Focused** - Works without external APIs, respects user privacy  
-
----
-
-**Ready to start intelligent searching?**
-
-```bash
-streamlit run app.py
+# General web search
+general_agent = GeneralAgent()
+general_result = general_agent.search("how to learn python programming")
+print(f"General Summary: {general_result.summary}")
 ```
 
-## Quick Start
+### Multi-Agent Comparison
+```python
+from agents.search_orchestrator import SearchOrchestrator, SearchType
 
-1. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+orchestrator = SearchOrchestrator()
 
-2. **Set up Environment Variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
+# Compare results from multiple agents
+results = orchestrator.multi_agent_search(
+    query="renewable energy",
+    agents=[SearchType.RESEARCH, SearchType.NEWS, SearchType.GENERAL],
+    max_results_per_agent=5
+)
 
-3. **Run the Application**
-   ```bash
-   streamlit run app.py
-   ```
+# results is a dictionary with agent results
+for agent_type, agent_result in results.items():
+    print(f"\n{agent_type.value.upper()} Agent:")
+    print(f"Summary: {agent_result.summary}")
+    print(f"Sources: {len(agent_result.sources)}")
+```
 
-## Usage
-
-### Basic Search
+### Comprehensive Search
 ```python
 from agents.search_orchestrator import SearchOrchestrator
 
 orchestrator = SearchOrchestrator()
-results = orchestrator.search("artificial intelligence trends 2024")
-print(results.summary)
+
+# Deep analysis with all agents
+results = orchestrator.comprehensive_search(
+    query="climate change solutions",
+    max_results_per_agent=8
+)
+
+# Access comprehensive results
+print(f"Overall Summary: {results.get('summary', 'N/A')}")
+print(f"Combined Key Points: {results.get('key_points', [])}")
+print(f"All Sources: {results.get('all_sources', [])}")
+
+# Individual agent results
+agent_results = results.get('agent_results', {})
+for agent_name, result in agent_results.items():
+    print(f"\n{agent_name} Focus:")
+    print(f"  {result.summary}")
 ```
 
-### Advanced Search with Specific Agents
+## 🤖 Core Agents
+
+### Research Agent
+**Specialization**: Academic papers, studies, scholarly content, research methodologies
+- Prioritizes peer-reviewed sources
+- Focuses on scientific and academic content
+- Enhanced keyword matching for research terms
+
+### News Agent  
+**Specialization**: Current events, breaking news, recent developments
+- Temporal relevance scoring (prioritizes recent content)
+- News source credibility ranking
+- Real-time event tracking
+
+### General Agent
+**Specialization**: Comprehensive web search across all content types
+- Broad domain coverage
+- Balanced source diversity
+- General-purpose optimization
+
+### Search Orchestrator
+**Capabilities**: Intelligent agent selection and coordination
+- Auto-detects query type and selects optimal agent
+- Multi-agent comparison and synthesis
+- Performance analytics and source overlap analysis
+
+## 🔍 Search Engines & Tools
+
+### Search Engines
+- **DuckDuckGo**: Privacy-focused web search (default, no API key required)
+- **Tavily**: Professional search API with enhanced results (requires API key)
+- **Wikipedia**: Encyclopedia and reference content (no API key required)
+
+### AI Summarization
+- **LLMSummarizer**: OpenAI GPT-powered intelligent summarization (requires API key)
+- **SimpleSummarizer**: Fallback text-based summarization (no API key required)
+
+### Key Classes
 ```python
-from agents.research_agent import ResearchAgent
-from agents.news_agent import NewsAgent
+# Core data structures
+@dataclass
+class SearchResult:
+    title: str
+    url: str
+    content: str
+    source: str
+    timestamp: datetime
+    relevance_score: float = 0.0
 
-# Research academic papers
-research_agent = ResearchAgent()
-academic_results = research_agent.search("machine learning algorithms")
-
-# Search for latest news
-news_agent = NewsAgent()
-news_results = news_agent.search("AI regulations")
+@dataclass  
+class SearchSummary:
+    query: str
+    summary: str
+    key_points: List[str]
+    sources: List[str]
+    total_results: int
+    search_time: float
 ```
 
-## Project Structure
+## ⚙️ Configuration
 
-```
-deep-search-with-agents/
-├── agents/                 # Agent implementations
-│   ├── base_agent.py      # Base agent class
-│   ├── research_agent.py  # Academic/research focused agent
-│   ├── news_agent.py      # News and current events agent
-│   ├── general_agent.py   # General web search agent
-│   └── search_orchestrator.py  # Main orchestration logic
-├── tools/                 # Search tools and utilities
-│   ├── web_search.py      # Web search implementations
-│   ├── content_parser.py  # Content parsing utilities
-│   └── summarizer.py      # AI summarization tools
-├── config/                # Configuration files
-│   └── settings.py        # Application settings
-├── utils/                 # Utility functions
-│   ├── logger.py          # Logging configuration
-│   └── helpers.py         # Helper functions
-├── tests/                 # Test files
-├── app.py                 # Streamlit web interface
-├── main.py                # CLI interface
-├── requirements.txt       # Python dependencies
-└── .env.example           # Environment variables template
+### Environment Variables (Optional)
+```bash
+# .env file (copy from .env.example)
+OPENAI_API_KEY=your_openai_api_key_here     # For AI summarization
+TAVILY_API_KEY=your_tavily_api_key_here     # For enhanced search results
+LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR)
 ```
 
-## Configuration
+### Configuration Features
+- **Graceful Fallbacks**: System works without API keys using free alternatives
+- **Multiple Search Engines**: Configurable search engine selection and priority
+- **Customizable Agents**: Easy to modify agent behavior and specializations
+- **Logging**: Comprehensive logging with configurable levels
+- **Settings Validation**: Automatic configuration validation on startup
 
-The system supports multiple search engines and AI providers:
+## 🏗️ Implementation Choices
 
-- **OpenAI**: For LLM capabilities (GPT-3.5/4)
-- **Tavily**: Professional web search API
-- **DuckDuckGo**: Free web search
-- **Wikipedia**: Encyclopedia search
+### 1. Main Implementation (`/agents`, `/tools`, `/config`, `/utils`)
+**Best for**: Production use, minimal dependencies, performance-focused
+- Lightweight with no LangChain dependency
+- Direct API integrations for maximum control
+- Fast startup and execution
+- Comprehensive error handling
 
-## Contributing
+### 2. LangChain Implementation (`/deep_agents_with_langchain`)
+**Best for**: Advanced AI features, complex workflows, experimentation
+- Advanced hierarchical planning and reflection loops
+- Multi-agent collaboration with sophisticated coordination
+- Built-in LangChain tools and integrations
+- Experimental features and cutting-edge capabilities
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+### 3. Official DeepAgents (`/deep_agents_official`)
+**Best for**: Following established patterns, community compatibility
+- Uses official deepagents package conventions
+- Virtual file system integration
+- TodoWrite planning tools
+- Community-standard implementations
 
-## License
+## 🧪 Testing & Development
+
+### Run Tests
+```bash
+# Basic functionality test
+python basic_test.py
+
+# Test specific implementation
+cd deep_agents_without_langchain
+python basic_test.py
+
+# Test with pytest (if test files exist)
+python -m pytest tests/ -v
+```
+
+### Development Setup
+```bash
+# Install development tools
+pip install pylint black flake8 pytest
+
+# Run code quality checks
+pylint agents/ tools/ config/ utils/ *.py
+
+# Format code
+black agents/ tools/ config/ utils/ *.py
+```
+
+### Code Quality Standards
+- **Pylint**: Maintaining 10.00/10 scores across all modules
+- **Type Hints**: Comprehensive type annotations
+- **Documentation**: Detailed docstrings for all public methods
+- **Error Handling**: Graceful degradation and comprehensive logging
+
+## 🔒 Privacy & Security
+
+- **Privacy-First**: Uses DuckDuckGo by default (no user tracking)
+- **No Data Persistence**: Search results are not permanently stored
+- **Optional APIs**: Core functionality works without external API keys
+- **Configurable Data Flow**: Control what information is sent to external services
+- **Local Processing**: AI processing can be done locally with fallbacks
+
+## 🚀 Performance Features
+
+- **Concurrent Processing**: Multiple searches executed in parallel
+- **Smart Caching**: Avoids duplicate requests and API calls
+- **Intelligent Ranking**: Relevance scoring and result deduplication
+- **Graceful Fallbacks**: Continues working when external services are unavailable
+- **Analytics**: Performance metrics and source overlap analysis
+- **Optimized Parsing**: Efficient content extraction and processing
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Add tests** for new functionality
+4. **Ensure code quality**: Run pylint and maintain 10.00/10 scores
+5. **Update documentation** as needed
+6. **Submit a pull request**
+
+### Contribution Guidelines
+- Follow existing code style and patterns
+- Add comprehensive docstrings and type hints
+- Include error handling and logging
+- Write tests for new functionality
+- Update README if adding new features
+
+## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 📊 Project Status
+
+✅ **Production Ready** - Comprehensive error handling, logging, and documentation  
+✅ **Multi-Implementation** - Three distinct approaches for different use cases  
+✅ **Highly Extensible** - Easy to customize and extend for specific needs  
+✅ **Multi-Interface** - CLI, web interface, and programmatic API  
+✅ **AI-Powered** - Smart agent selection and intelligent content processing  
+✅ **Privacy Focused** - Works without external APIs, respects user privacy  
+✅ **High Performance** - Concurrent processing and intelligent caching  
+
+---
+
+## 🎯 Quick Commands Reference
+
+```bash
+# Start web interface
+streamlit run app.py
+
+# CLI search examples  
+python main.py search "your query here"
+python main.py search "research topic" --agent research
+python main.py multi "topic" --agents research news general
+python main.py comprehensive "deep analysis topic"
+python main.py capabilities
+
+# Test functionality
+python basic_test.py
+
+# Alternative implementations
+cd deep_agents_with_langchain && python main.py search "query"
+cd deep_agents_official && python demo.py
+```
+
+**Ready to start intelligent searching?** 🔍
+
+Choose your preferred interface and begin exploring the power of AI-driven web search!
