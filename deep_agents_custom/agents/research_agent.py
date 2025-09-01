@@ -4,7 +4,7 @@ Research Agent - Specialized for academic and research-focused searches.
 
 import time
 from typing import List
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary
+from .base_agent import BaseAgent, SearchResult, SearchSummary
 
 
 class ResearchAgent(BaseAgent):

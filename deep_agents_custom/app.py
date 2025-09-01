@@ -37,8 +37,17 @@ def main():
     """Main Streamlit application"""
 
     # Header
-    st.title("Deep Search Agents")
-    st.markdown("*Intelligent web search using specialized AI agents*")
+    st.title("🔬 Deep Research Agents")
+    st.markdown("*AI-powered research agents for comprehensive topic analysis*")
+    
+    # Research description
+    st.info("""
+    **How it works:** Enter a research topic and our specialized AI agents will:
+    • Search multiple sources for relevant information
+    • Analyze and synthesize findings from various databases
+    • Generate a comprehensive 250-word summary
+    • Provide reference links for further reading
+    """)
 
     # Sidebar
     create_sidebar()
@@ -102,13 +111,13 @@ def create_sidebar():
     # Information section
     st.sidebar.header("ℹ️ About")
     st.sidebar.markdown("""
-    **Deep Search Agents** uses specialized AI agents to search the web:
+    **Deep Research Agents** uses specialized AI agents for comprehensive research:
 
-    - 🔬 **Research Agent**: Academic papers, studies
-    - 📰 **News Agent**: Current events, breaking news
-    - 🌐 **General Agent**: Comprehensive web search
+    - 🔬 **Research Agent**: Academic papers, scientific studies
+    - 📰 **News Agent**: Current events, recent developments
+    - 🌐 **General Agent**: Comprehensive web research
 
-    The system automatically selects the best agent or you can choose manually.
+    Get 250-word research summaries with reference links for any topic.
     """)
 
     # Agent capabilities
@@ -126,52 +135,52 @@ def create_main_interface():
 
     # Search input with proper alignment
     with st.container():
-        st.markdown("**Search Query:**")
+        st.markdown("**Research Topic:**")
         col1, col2 = st.columns([4, 1])
 
         with col1:
             query = st.text_input(
                 "search_input",
-                placeholder="e.g., artificial intelligence trends 2024",
+                placeholder="e.g., quantum computing breakthroughs, sustainable energy solutions",
                 key="search_query",
                 label_visibility="collapsed"
             )
 
         with col2:
             search_button = st.button(
-                "Search", type="primary", use_container_width=True)
+                "🔍 Research", type="primary", use_container_width=True)
 
-    # Example queries
+    # Example research topics
     st.markdown("""
-    **Example queries:**
-    - 🔬 Latest artificial intelligence research 2024
-    - 📰 Technology news today
-    - 🌐 Climate change environmental impact
-    - 💼 Remote work productivity tips
-    - � Latest medical breakthroughs
-    - 🚀 Space exploration updates
+    **Example research topics:**
+    - 🧬 CRISPR gene editing latest developments
+    - 🌱 Renewable energy storage technologies
+    - 🤖 Machine learning in healthcare applications
+    - � Space exploration recent missions
+    - 🧠 Neuroplasticity and brain research
+    - 🌊 Ocean plastic pollution solutions
     """)
 
     # Perform search
     if search_button and query:
         perform_search(query)
     elif search_button and not query:
-        st.warning("Please enter a search query.")
+        st.warning("Please enter a research topic.")
 
 
 def perform_search(query: str):
-    """Perform search based on selected mode"""
+    """Perform research based on selected mode"""
 
     search_mode = st.session_state.search_mode
 
-    with st.spinner(f"Searching with {search_mode.lower()}..."):
+    with st.spinner(f"🔍 Researching {query} using {search_mode.lower()}..."):
         start_time = time.time()
 
         try:
             if search_mode == "Auto-Select Agent":
                 result = st.session_state.orchestrator.search(
                     query, SearchType.AUTO)
-                display_single_result(result, "Auto-Selected Agent")
+                display_single_result(result, "Auto-Selected Research Agent")
 
             elif search_mode == "Single Agent":
                 agent_map = {
@@ -183,7 +192,7 @@ def perform_search(query: str):
                 result = st.session_state.orchestrator.search(
                     query, search_type)
                 display_single_result(
-                    result, f"{st.session_state.selected_agent} Agent")
+                    result, f"{st.session_state.selected_agent} Research Agent")
 
             elif search_mode == "Multi-Agent":
                 agent_map = {
@@ -217,89 +226,77 @@ def perform_search(query: str):
 
 
 def display_single_result(result, agent_name: str):
-    """Display single agent search result"""
+    """Display single agent search result with research focus"""
 
-    st.header(f"🤖 {agent_name} Results")
-
-    # Metrics
+    st.header(f"🔬 Research Results: {result.query}")
+    
+    # Research metrics
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Results Found", result.total_results)
+        st.metric("📄 Sources Found", result.total_results)
     with col2:
-        st.metric("Search Time", format_search_time(result.search_time))
+        st.metric("⏱️ Research Time", format_search_time(result.search_time))
     with col3:
-        st.metric("Sources", len(result.sources))
+        st.metric("🔍 Agent Used", agent_name)
 
-    # Summary with Citations
-    st.subheader("📋 Summary with Citations")
-
-    # Show cited summary if available, otherwise regular summary
-    if hasattr(result, 'cited_summary') and result.cited_summary:
-        st.markdown(result.cited_summary)
-    elif hasattr(result, 'summary') and result.summary:
-        st.write(result.summary)
+    # Main research summary (250 words)
+    st.subheader("📋 Research Summary")
+    
+    # Generate or display a research-focused summary
+    if hasattr(result, 'summary') and result.summary:
+        # Ensure summary is approximately 250 words
+        words = result.summary.split()
+        if len(words) > 280:
+            # Truncate to approximately 250 words and add proper ending
+            summary_250 = ' '.join(words[:250])
+            # Find the last complete sentence
+            last_period = summary_250.rfind('.')
+            if last_period > 0:
+                summary_250 = summary_250[:last_period + 1]
+            else:
+                summary_250 += "..."
+        else:
+            summary_250 = result.summary
+        
+        st.write(summary_250)
+        
+        # Word count display
+        word_count = len(summary_250.split())
+        st.caption(f"� Summary: {word_count} words")
     else:
-        st.write("No summary available for this search.")
+        st.warning("No research summary available for this topic.")
 
-    # Citations Section
-    if hasattr(result, 'citations') and result.citations:
-        st.subheader("📚 References")
-
-        # Create a nice formatted citation list
-        citation_text = ""
-        for ref_key, citation_info in result.citations.items():
-            citation_text += f"**{ref_key}** {citation_info['full_citation']}\n\n"
-
-        st.markdown(citation_text)
-
-        # Alternative: Show as expandable section
-        with st.expander("📖 View All Citations", expanded=False):
-            for ref_key, citation_info in result.citations.items():
-                col1, col2 = st.columns([1, 4])
-                with col1:
-                    st.write(f"**{ref_key}**")
-                with col2:
-                    st.write(f"**{citation_info['title']}**")
-                    st.write(
-                        f"Source: {citation_info['source']} | Date: {citation_info['timestamp']}")
-                    st.markdown(f"🔗 [Link]({citation_info['url']})")
-                st.divider()
-
-    # Key insights
+    # Key insights (if available)
     if hasattr(result, 'key_points') and result.key_points:
-        st.subheader("🔍 Key Insights")
-        for i, point in enumerate(result.key_points, 1):
-            st.write(f"{i}. {point}")
+        st.subheader("🔍 Key Research Findings")
+        for i, point in enumerate(result.key_points[:5], 1):
+            st.write(f"• {point}")
 
-    # Detailed Results
+    # Reference links for further reading
+    st.subheader("� Reference Links for Further Information")
+    
     if hasattr(result, 'results') and result.results:
-        st.subheader("📖 Detailed Results")
-
-        # Display individual search results with better formatting
-        for i, search_result in enumerate(result.results[:10], 1):
-            with st.expander(f"Result {i}: {search_result.title}", expanded=(i <= 3)):
-                col1, col2 = st.columns([3, 1])
-
-                with col1:
-                    st.write(f"**Content:** {search_result.content}")
-                    if hasattr(search_result, 'url') and search_result.url:
-                        st.markdown(f"🔗 [Read more]({search_result.url})")
-
-                with col2:
-                    st.write(f"**Source:** {search_result.source}")
-                    if hasattr(search_result, 'relevance_score'):
-                        st.write(
-                            f"**Relevance:** {search_result.relevance_score:.1%}")
-                    if hasattr(search_result, 'timestamp'):
-                        st.write(
-                            f"**Found:** {search_result.timestamp.strftime('%H:%M:%S')}")
-
-    # Sources (fallback if no detailed results)
+        # Display top sources with titles and links
+        st.write("**Primary Sources:**")
+        for i, source in enumerate(result.results[:8], 1):
+            if hasattr(source, 'url') and hasattr(source, 'title'):
+                st.markdown(f"{i}. **[{source.title}]({source.url})**")
+                if hasattr(source, 'source'):
+                    st.caption(f"   Source: {source.source}")
+            elif hasattr(source, 'url'):
+                st.markdown(f"{i}. **[View Source]({source.url})**")
+    
     elif hasattr(result, 'sources') and result.sources:
-        st.subheader("🔗 Sources")
-        # Show first 10 sources
-        for i, source in enumerate(result.sources[:10], 1):
-            st.write(f"{i}. [{source}]({source})")
+        # Fallback to basic source links
+        st.write("**Source Links:**")
+        for i, source_url in enumerate(result.sources[:8], 1):
+            st.markdown(f"{i}. [Research Source {i}]({source_url})")
+    
+    else:
+        st.info("No reference links available for this research topic.")
+
+    # Research completion indicator
+    st.success("✅ Research completed successfully!")
 
 
 def display_multi_results(results: Dict[str, Any]):

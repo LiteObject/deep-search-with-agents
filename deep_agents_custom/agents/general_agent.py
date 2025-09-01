@@ -7,7 +7,7 @@ import time
 from typing import List
 
 # First-party imports
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary
+from .base_agent import BaseAgent, SearchResult, SearchSummary
 
 
 class GeneralAgent(BaseAgent):
@@ -58,7 +58,7 @@ class GeneralAgent(BaseAgent):
         # If still None after initialization, handle gracefully
         if self.search_manager is None:
             # Fallback to simple single-engine search
-            from tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel,import-error
+            from ..tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel
             ddg_search = DuckDuckGoSearch()
             results = ddg_search.search(query, max_results)
         else:
