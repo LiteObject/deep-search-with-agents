@@ -3,11 +3,10 @@ Flask web application for LangChain Deep Agents
 """
 
 import logging
-import asyncio
 from datetime import datetime
 from typing import Dict, Any
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string  # pylint: disable=import-error # type: ignore
 from config.settings import settings
 
 app = Flask(__name__)
@@ -198,8 +197,8 @@ def config_info():
     return jsonify({
         'service': 'LangChain Deep Agents',
         'features': {
-            'deep_agent_features': list(settings.DEEP_AGENT_SETTINGS.keys()),
-            'available_agents': list(settings.AGENT_CONFIGS.keys()),
+            'deep_agent_features': list(getattr(settings, 'DEEP_AGENT_SETTINGS', {}).keys()),
+            'available_agents': list(getattr(settings, 'AGENT_CONFIGS', {}).keys()),
             'orchestration_modes': ['hierarchical', 'parallel', 'sequential', 'consensus']
         },
         'status': 'operational'

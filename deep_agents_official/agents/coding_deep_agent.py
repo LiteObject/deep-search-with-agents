@@ -50,8 +50,12 @@ class CodingDeepAgent:
                     "Code Analysis Results:",
                     f"- Total lines: {len(lines)}",
                     f"- Non-empty lines: {len([line for line in lines if line.strip()])}",
-                    f"- Comments found: {len([line for line in lines if line.strip().startswith('#')])}"
                 ]
+
+                # Count comments
+                comments_count = len([line for line in lines
+                                      if line.strip().startswith('#')])
+                analysis.append(f"- Comments found: {comments_count}")
 
                 # Check for common patterns
                 if 'def ' in code:
@@ -77,21 +81,21 @@ class CodingDeepAgent:
 import unittest
 
 class TestGeneratedCode(unittest.TestCase):
-    
+
     def setUp(self):
         # Set up test fixtures before each test method
         pass
-    
+
     def test_basic_functionality(self):
         # Test basic functionality
         # TODO: Implement specific test cases
         pass
-    
+
     def test_edge_cases(self):
         # Test edge cases and error conditions
         # TODO: Implement edge case tests
         pass
-    
+
     def tearDown(self):
         # Clean up after each test method
         pass
@@ -99,8 +103,7 @@ class TestGeneratedCode(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
 """
-                else:
-                    return "No functions found in the code to generate tests for."
+                return "No functions found in the code to generate tests for."
 
             except (ValueError, AttributeError, TypeError) as e:
                 return f"Test generation failed: {str(e)}"
@@ -133,17 +136,20 @@ if __name__ == '__main__':
         tools = [
             Tool(
                 name="analyze_code",
-                description="Analyze code for structure, complexity, and potential improvements. Provide the code as input.",
+                description=("Analyze code for structure, complexity, and potential "
+                             "improvements. Provide the code as input."),
                 func=analyze_code
             ),
             Tool(
                 name="generate_tests",
-                description="Generate unit test templates for the provided code. Useful for creating test frameworks.",
+                description=("Generate unit test templates for the provided code. "
+                             "Useful for creating test frameworks."),
                 func=generate_tests
             ),
             Tool(
                 name="debug_code",
-                description="Provide debugging suggestions for code with errors. Input should include both code and error message.",
+                description=("Provide debugging suggestions for code with errors. "
+                             "Input should include both code and error message."),
                 func=debug_code
             )
         ]
@@ -157,7 +163,8 @@ if __name__ == '__main__':
         coding_tools = self._create_coding_tools()
 
         # Coding-specific instructions following Claude Code patterns
-        instructions = """You are a Coding DeepAgent, specialized in code analysis, generation, debugging, and optimization.
+        instructions = """You are a Coding DeepAgent, specialized in code analysis, generation,
+debugging, and optimization.
 
 Your core capabilities:
 1. **Code Analysis**: Analyze code structure, complexity, and quality
@@ -182,20 +189,24 @@ File Organization:
 - Use `debugging_notes.txt` for debugging insights
 - Document architecture in `architecture.md`
 
-Always follow best practices: clean code, proper documentation, comprehensive testing, and security considerations."""
+Always follow best practices: clean code, proper documentation, comprehensive testing,
+and security considerations."""
 
         # Create sub-agents for specialized tasks
         sub_agents = {
             "code_reviewer": {
-                "instructions": "Review code for quality, security, and best practices. Focus on identifying potential issues and improvements.",
+                "instructions": ("Review code for quality, security, and best practices. "
+                                 "Focus on identifying potential issues and improvements."),
                 "tools": []
             },
             "test_engineer": {
-                "instructions": "Generate comprehensive test suites and validate code functionality. Focus on edge cases and error conditions.",
+                "instructions": ("Generate comprehensive test suites and validate "
+                                 "code functionality. Focus on edge cases and error conditions."),
                 "tools": []
             },
             "performance_optimizer": {
-                "instructions": "Analyze and optimize code performance. Focus on identifying bottlenecks and suggesting improvements.",
+                "instructions": ("Analyze and optimize code performance. Focus on "
+                                 "identifying bottlenecks and suggesting improvements."),
                 "tools": []
             }
         }
@@ -246,7 +257,9 @@ Begin by planning your analysis approach and then execute systematically."""
 
             # Execute the analysis
             # Note: This would use the actual agent when deepagents package is available
-            result = f"Code analysis completed for task: {task_description or 'General analysis'}\nPrompt: {analysis_prompt}"
+            task_name = task_description or 'General analysis'
+            result = (f"Code analysis completed for task: {task_name}\n"
+                      f"Prompt: {analysis_prompt}")
 
             logger.info("Code analysis completed")
 

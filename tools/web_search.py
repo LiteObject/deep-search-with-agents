@@ -9,7 +9,7 @@ from typing import List, Optional
 
 import requests  # type: ignore
 
-from agents.base_agent import SearchResult
+from agents.base_agent import SearchResult  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +21,19 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
         self.base_url = "https://html.duckduckgo.com/html/"
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36'
+            'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                           'AppleWebKit/537.36')
         })
 
-    def search(self, query: str, max_results: int = 10) -> List[SearchResult]:
+    def search(self, query: str, max_results: int = 10,
+               date_restrict: str = "y") -> List[SearchResult]:
         """
         Perform DuckDuckGo search
 
         Args:
             query: Search query
             max_results: Maximum number of results
+            date_restrict: Date restriction (d=day, w=week, m=month, y=year)
 
         Returns:
             List[SearchResult]: Search results
@@ -43,16 +45,21 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
 
             results = []
             with DDGS() as ddgs:
-                search_results = ddgs.text(query, max_results=max_results)
+                # Add date filtering to prefer recent results
+                search_results = ddgs.text(
+                    query,
+                    max_results=max_results,
+                    timelimit=date_restrict  # Filter by time period
+                )
 
                 for i, result in enumerate(search_results):
                     if i >= max_results:
                         break
 
                     search_result = SearchResult(
-                        title=result.get('title', ''),
-                        url=result.get('href', ''),
-                        content=result.get('body', ''),
+                        title=str(result.get('title') or ''),  # type: ignore
+                        url=str(result.get('href') or ''),  # type: ignore
+                        content=str(result.get('body') or ''),  # type: ignore
                         source='duckduckgo',
                         timestamp=datetime.now(),
                         relevance_score=1.0 - (i * 0.1)  # Simple scoring
@@ -105,16 +112,18 @@ class TavilySearch:  # pylint: disable=too-few-public-methods
             )
 
             results = []
-            for result in response.get('results', []):
-                search_result = SearchResult(
-                    title=result.get('title', ''),
-                    url=result.get('url', ''),
-                    content=result.get('content', ''),
-                    source='tavily',
-                    timestamp=datetime.now(),
-                    relevance_score=result.get('score', 0.5)
-                )
-                results.append(search_result)
+            if response:
+                for result in response.get('results', []):  # type: ignore
+                    search_result = SearchResult(
+                        title=str(result.get('title') or ''),  # type: ignore
+                        url=str(result.get('url') or ''),  # type: ignore
+                        content=str(result.get('content')
+                                    or ''),  # type: ignore
+                        source='tavily',
+                        timestamp=datetime.now(),
+                        relevance_score=result.get('score', 0.5)
+                    )
+                    results.append(search_result)
 
             return results
 
@@ -214,7 +223,7 @@ class WebSearchManager:
         self.default_engine = os.getenv('DEFAULT_SEARCH_ENGINE', 'duckduckgo')
 
     def search(self, query: str, engine: Optional[str] = None,
-               max_results: int = 10) -> List[SearchResult]:
+               max_results: int = 10, date_restrict: str = "y") -> List[SearchResult]:
         """
         Perform search using specified engine
 
@@ -222,6 +231,7 @@ class WebSearchManager:
             query: Search query
             engine: Search engine to use
             max_results: Maximum number of results
+            date_restrict: Date restriction for filtering old results
 
         Returns:
             List[SearchResult]: Search results
@@ -232,7 +242,14 @@ class WebSearchManager:
             logger.error("Unknown search engine: %s", engine)
             return []
 
-        logger.info("Searching with %s: %s", engine, query)
+        logger.info("Searching with %s: %s (date filter: %s)",
+                    engine, query, date_restrict)
+
+        # Pass date restriction to search engines that support it
+        if engine == 'duckduckgo':
+            return self.engines[engine].search(query, max_results, date_restrict)
+
+        # For engines that don't support date filtering, use regular search
         return self.engines[engine].search(query, max_results)
 
     def multi_search(self, query: str, engines: Optional[List[str]] = None,

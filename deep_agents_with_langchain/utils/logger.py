@@ -25,21 +25,26 @@ class DeepAgentFormatter(logging.Formatter):
 
     def format(self, record):
         # Add color for console output
-        if hasattr(record, 'use_color') and record.use_color:
+        use_color = getattr(record, 'use_color', False)
+        if use_color:
             color = self.COLORS.get(record.levelname, '')
             reset = self.COLORS['RESET']
             record.levelname = f"{color}{record.levelname}{reset}"
 
         # Format timestamp
-        record.timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
         # Add agent context if available
         agent_context = ""
-        if hasattr(record, 'agent_name'):
-            agent_context = f"[{record.agent_name}] "
+        agent_name = getattr(record, 'agent_name', None)
+        if agent_name:
+            agent_context = f"[{agent_name}] "
 
         # Format the message
-        formatted_message = f"{record.timestamp} - {record.levelname} - {agent_context}{record.getMessage()}"
+        formatted_message = (
+            f"{timestamp} - {record.levelname} - "
+            f"{agent_context}{record.getMessage()}"
+        )
 
         # Add exception info if present
         if record.exc_info:
@@ -150,7 +155,9 @@ class AgentLogger:
         context = {
             'agent_name': self.name,
             'tool_name': tool_name,
-            'result_summary': result_summary[:50] + "..." if len(result_summary) > 50 else result_summary,
+            'result_summary': (result_summary[:50] + "..."
+                               if len(result_summary) > 50
+                               else result_summary),
             'operation': 'tool_usage'
         }
         self.debug(f"Using tool: {tool_name}", **context)
@@ -205,7 +212,9 @@ class OrchestrationLogger(AgentLogger):
             'operation': 'query_analysis'
         }
         self.info(
-            f"Query analyzed: {analysis_result.get('complexity_level', 'unknown')} complexity", **context)
+            f"Query analyzed: "
+            f"{analysis_result.get('complexity_level', 'unknown')} complexity",
+            **context)
 
     def log_agent_selection(self, selected_agents: list, collaboration_mode: str):
         """Log agent selection decisions"""
@@ -237,21 +246,26 @@ class OrchestrationLogger(AgentLogger):
         }
         if success:
             self.info(
-                f"Orchestration completed in {duration:.2f}s (confidence: {final_confidence:.2f})", **context)
+                f"Orchestration completed in {duration:.2f}s "
+                f"(confidence: {final_confidence:.2f})", **context)
         else:
             self.warning(
                 f"Orchestration failed after {duration:.2f}s", **context)
 
-    def log_consensus_result(self, participating_agents: list, consensus_score: float, final_decision: str):
+    def log_consensus_result(self, participating_agents: list,
+                             consensus_score: float, final_decision: str):
         """Log consensus building results"""
         context = {
             'participating_agents': participating_agents,
             'consensus_score': consensus_score,
-            'final_decision': final_decision[:50] + "..." if len(final_decision) > 50 else final_decision,
+            'final_decision': (final_decision[:50] + "..."
+                               if len(final_decision) > 50
+                               else final_decision),
             'operation': 'consensus'
         }
         self.info(
-            f"Consensus reached (score: {consensus_score:.2f}) among {len(participating_agents)} agents", **context)
+            f"Consensus reached (score: {consensus_score:.2f}) "
+            f"among {len(participating_agents)} agents", **context)
 
 
 class PerformanceLogger:
@@ -294,7 +308,8 @@ class PerformanceLogger:
         self.logger.log_performance_metric(
             f"{component}_memory", memory_mb, "MB")
 
-    def log_api_call(self, api_name: str, duration: float, success: bool, tokens_used: int = 0):
+    def log_api_call(self, api_name: str, duration: float,
+                     success: bool, tokens_used: int = 0):
         """Log API call metrics"""
         context = {
             'api_name': api_name,
@@ -304,7 +319,8 @@ class PerformanceLogger:
             'operation': 'api_call'
         }
         self.logger.info(
-            f"API call to {api_name}: {'success' if success else 'failed'} ({duration:.2f}s)", **context)
+            f"API call to {api_name}: "
+            f"{'success' if success else 'failed'} ({duration:.2f}s)", **context)
 
     def get_performance_summary(self) -> Dict[str, Any]:
         """Get performance summary"""

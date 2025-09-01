@@ -2,11 +2,14 @@
 General Agent - For broad, general-purpose searches.
 """
 
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary
+# Standard library imports
 import os
 import sys
 import time
 from typing import List
+
+# First-party imports
+from agents.base_agent import BaseAgent, SearchResult, SearchSummary  # pylint: disable=import-error
 
 # Add parent directory to Python path to ensure consistent imports
 parent_dir = os.path.dirname(os.path.dirname(
@@ -63,7 +66,7 @@ class GeneralAgent(BaseAgent):
         # If still None after initialization, handle gracefully
         if self.search_manager is None:
             # Fallback to simple single-engine search
-            from tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel
+            from tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel,import-error
             ddg_search = DuckDuckGoSearch()
             results = ddg_search.search(query, max_results)
         else:

@@ -3,6 +3,8 @@ Base Agent class for all search agents.
 Provides common functionality and interface for specialized agents.
 """
 
+import os
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -52,10 +54,6 @@ class BaseAgent(ABC):
     def _initialize_common_components(self):
         """Initialize common components used by all agents"""
         try:
-            # Import from parent directory since tools is at same level as agents
-            import sys
-            import os
-
             # Add parent directory to path for imports
             parent_dir = os.path.dirname(
                 os.path.dirname(os.path.abspath(__file__)))

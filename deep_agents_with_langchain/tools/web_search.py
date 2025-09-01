@@ -13,6 +13,22 @@ import requests  # type: ignore
 from langchain.tools import BaseTool
 from langchain.tools.base import ToolException
 
+# Optional imports for search tools
+try:
+    from duckduckgo_search import DDGS
+except ImportError:
+    DDGS = None
+
+try:
+    import wikipedia
+except ImportError:
+    wikipedia = None
+
+try:
+    import arxiv  # type: ignore
+except ImportError:
+    arxiv = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,8 +47,8 @@ class EnhancedSearchResult:
 class SerperWebSearchTool(BaseTool):
     """Enhanced web search tool using Serper API"""
 
-    name = "serper_web_search"
-    description = "Search the web using Serper API for current information"
+    name: str = "serper_web_search"
+    description: str = "Search the web using Serper API for current information"
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__(
@@ -51,7 +67,7 @@ class SerperWebSearchTool(BaseTool):
         })
 
     def _run(self, query: str, num_results: int = 10, search_type: str = "search",
-             **kwargs) -> str:
+             date_restrict: str = "y5", **kwargs) -> str:
         """Run web search"""
         try:
             # Prepare search parameters
@@ -59,7 +75,8 @@ class SerperWebSearchTool(BaseTool):
                 "q": query,
                 "num": min(num_results, 10),  # Serper limits to 10
                 "gl": "us",  # Geolocation
-                "hl": "en"   # Language
+                "hl": "en",  # Language
+                "dateRestrict": date_restrict  # Restrict to last 5 years by default
             }
 
             # Choose endpoint based on search type
@@ -164,13 +181,20 @@ Relevance: {result.relevance_score:.2f}
 class DuckDuckGoSearchTool(BaseTool):
     """DuckDuckGo search tool as fallback"""
 
-    name = "duckduckgo_search"
-    description = "Search using DuckDuckGo when other search engines are unavailable"
+    name: str = "duckduckgo_search"
+    description: str = "Search using DuckDuckGo when other search engines are unavailable"
+
+    def __init__(self):
+        super().__init__(
+            name=self.name,
+            description=self.description
+        )
 
     def _run(self, query: str, max_results: int = 10, **kwargs) -> str:
         """Run DuckDuckGo search"""
         try:
-            from duckduckgo_search import DDGS
+            if DDGS is None:
+                raise ToolException("DuckDuckGo search library not available")
 
             results = []
             with DDGS() as ddgs:
@@ -193,9 +217,6 @@ class DuckDuckGoSearchTool(BaseTool):
 
             return self._format_results_for_llm(results)
 
-        except ImportError as exc:
-            raise ToolException(
-                "DuckDuckGo search library not available") from exc
         except (ValueError, AttributeError, ConnectionError) as e:
             raise ToolException(f"DuckDuckGo search failed: {str(e)}") from e
 
@@ -225,13 +246,20 @@ Source: {result.source}
 class WikipediaSearchTool(BaseTool):
     """Wikipedia search tool for encyclopedic information"""
 
-    name = "wikipedia_search"
-    description = "Search Wikipedia for encyclopedic and factual information"
+    name: str = "wikipedia_search"
+    description: str = "Search Wikipedia for encyclopedic and factual information"
+
+    def __init__(self):
+        super().__init__(
+            name=self.name,
+            description=self.description
+        )
 
     def _run(self, query: str, max_results: int = 5, **kwargs) -> str:
         """Run Wikipedia search"""
         try:
-            import wikipedia
+            if wikipedia is None:
+                raise ToolException("Wikipedia library not available")
 
             wikipedia.set_lang("en")
             results = []
@@ -274,7 +302,8 @@ class WikipediaSearchTool(BaseTool):
                                 metadata={'disambiguation': True}
                             )
                             results.append(enhanced_result)
-                        except Exception:
+                        except (wikipedia.exceptions.PageError,
+                                wikipedia.exceptions.DisambiguationError):
                             continue
 
                 except wikipedia.exceptions.PageError:
@@ -282,8 +311,6 @@ class WikipediaSearchTool(BaseTool):
 
             return self._format_results_for_llm(results)
 
-        except ImportError as exc:
-            raise ToolException("Wikipedia library not available") from exc
         except (ValueError, AttributeError, ConnectionError) as e:
             raise ToolException(f"Wikipedia search failed: {str(e)}") from e
 
@@ -312,8 +339,8 @@ Summary: {result.content}
 class NewsSearchTool(BaseTool):
     """News search tool for current events"""
 
-    name = "news_search"
-    description = "Search for recent news articles and current events"
+    name: str = "news_search"
+    description: str = "Search for recent news articles and current events"
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__(
@@ -394,13 +421,20 @@ Summary: {result.get('snippet', 'No summary available')}
 class ArxivSearchTool(BaseTool):
     """ArXiv search tool for academic papers"""
 
-    name = "arxiv_search"
-    description = "Search ArXiv for academic papers and research"
+    name: str = "arxiv_search"
+    description: str = "Search ArXiv for academic papers and research"
+
+    def __init__(self):
+        super().__init__(
+            name=self.name,
+            description=self.description
+        )
 
     def _run(self, query: str, max_results: int = 5, **kwargs) -> str:
         """Run ArXiv search"""
         try:
-            import arxiv
+            if arxiv is None:
+                raise ToolException("ArXiv library not available")
 
             client = arxiv.Client()
             search = arxiv.Search(
@@ -424,8 +458,6 @@ Categories: {', '.join(paper.categories)}
 
             return "\n\n".join(results) if results else "No ArXiv papers found."
 
-        except ImportError as exc:
-            raise ToolException("ArXiv library not available") from exc
         except (ValueError, AttributeError, ConnectionError) as e:
             raise ToolException(f"ArXiv search failed: {str(e)}") from e
 
@@ -449,26 +481,26 @@ def create_web_search_tools() -> List[BaseTool]:
     try:
         ddg_tool = DuckDuckGoSearchTool()
         tools.append(ddg_tool)
-    except Exception:
-        logger.warning("DuckDuckGo search not available")
+    except (ImportError, AttributeError, RuntimeError, ToolException) as e:
+        logger.warning("DuckDuckGo search not available: %s", str(e))
 
     try:
         wiki_tool = WikipediaSearchTool()
         tools.append(wiki_tool)
-    except Exception:
-        logger.warning("Wikipedia search not available")
+    except (ImportError, AttributeError, RuntimeError, ToolException) as e:
+        logger.warning("Wikipedia search not available: %s", str(e))
 
     try:
         news_tool = NewsSearchTool()
         tools.append(news_tool)
-    except Exception:
-        logger.warning("News search not available")
+    except (ImportError, AttributeError, RuntimeError, ToolException) as e:
+        logger.warning("News search not available: %s", str(e))
 
     try:
         arxiv_tool = ArxivSearchTool()
         tools.append(arxiv_tool)
-    except Exception:
-        logger.warning("ArXiv search not available")
+    except (ImportError, AttributeError, RuntimeError, ToolException) as e:
+        logger.warning("ArXiv search not available: %s", str(e))
 
     if not tools:
         logger.error("No search tools available")

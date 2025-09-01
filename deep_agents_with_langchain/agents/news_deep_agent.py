@@ -8,9 +8,18 @@ Implements real-time news analysis, fact-checking, and trend detection.
 from typing import List, Dict, Any, Optional
 import logging
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
+# LangChain imports
 from langchain.tools import BaseTool
-from langchain.tools import DuckDuckGoSearchRun
+try:
+    from langchain_community.tools import DuckDuckGoSearchRun
+except ImportError:
+    try:
+        # pylint: disable=import-error,ungrouped-imports
+        from langchain.tools import DuckDuckGoSearchRun
+    except ImportError:
+        DuckDuckGoSearchRun = None
 
 from .base_deep_agent import BaseDeepAgent, DeepAgentResult
 
@@ -32,6 +41,10 @@ class RealTimeNewsTool(BaseTool):
     def _run(self, query: str) -> str:
         """Execute real-time news search"""
         try:
+            if DuckDuckGoSearchRun is None:
+                return ("News search tool is not available. "
+                        "Please install langchain-community package.")
+
             search = DuckDuckGoSearchRun()
             # Add time constraints for recent news
             today = datetime.now().strftime("%Y-%m-%d")
@@ -63,6 +76,10 @@ class FactCheckTool(BaseTool):
     def _run(self, claim: str) -> str:
         """Fact-check a claim"""
         try:
+            if DuckDuckGoSearchRun is None:
+                return ("Fact-check tool is not available. "
+                        "Please install langchain-community package.")
+
             search = DuckDuckGoSearchRun()
             fact_check_query = f'"{claim}" fact check verification snopes factcheck.org'
             results = search.run(fact_check_query)
@@ -92,6 +109,10 @@ class TrendAnalysisTool(BaseTool):
     def _run(self, topic: str) -> str:
         """Analyze trends for a topic"""
         try:
+            if DuckDuckGoSearchRun is None:
+                return ("Trend analysis tool is not available. "
+                        "Please install langchain-community package.")
+
             # Search for trend-related content
             search = DuckDuckGoSearchRun()
 
@@ -134,8 +155,11 @@ class SourceCredibilityTool(BaseTool):
     def _run(self, source_url: str) -> str:
         """Assess source credibility"""
         try:
+            if DuckDuckGoSearchRun is None:
+                return ("Source credibility tool is not available. "
+                        "Please install langchain-community package.")
+
             # Extract domain from URL
-            from urllib.parse import urlparse
             domain = urlparse(source_url).netloc if source_url.startswith(
                 'http') else source_url
 
@@ -185,8 +209,11 @@ class NewsDeepAgent(BaseDeepAgent):
             FactCheckTool(),
             TrendAnalysisTool(),
             SourceCredibilityTool(),
-            DuckDuckGoSearchRun()
         ]
+
+        # Only add DuckDuckGoSearchRun if available
+        if DuckDuckGoSearchRun is not None:
+            tools.append(DuckDuckGoSearchRun())
 
         return tools
 
@@ -258,7 +285,8 @@ class NewsDeepAgent(BaseDeepAgent):
 
             # Add credibility warnings if needed
             if result.confidence_score < self.fact_check_confidence:
-                warning = "\n\n[VERIFICATION NEEDED: Some claims in this report require additional verification from primary sources.]"
+                warning = ("\n\n[VERIFICATION NEEDED: Some claims in this report require "
+                           "additional verification from primary sources.]")
                 result.final_result += warning
 
             return result
@@ -273,7 +301,7 @@ class NewsDeepAgent(BaseDeepAgent):
         metadata += f"Query: {result.query}\n"
         metadata += f"Analysis Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
         metadata += f"Confidence Score: {result.confidence_score:.2f}\n"
-        metadata += f"Verification Level: "
+        metadata += "Verification Level: "
 
         if result.confidence_score >= 0.9:
             metadata += "High - Multiple sources verified\n"
@@ -366,6 +394,10 @@ Rate bias level (0-10, where 0=neutral, 10=highly biased) and provide specific e
         developments = []
 
         try:
+            if DuckDuckGoSearchRun is None:
+                return [{"error": "Story tracking is not available. "
+                                  "Please install langchain-community package."}]
+
             for i in range(days_back):
                 date = datetime.now() - timedelta(days=i)
                 date_str = date.strftime("%Y-%m-%d")

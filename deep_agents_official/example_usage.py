@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=import-error,no-name-in-module
 """
 Example usage of the Official DeepAgents implementation.
 Demonstrates how to use individual agents and the orchestrator.
@@ -142,7 +143,8 @@ def example_orchestrator():
         orchestrator = DeepAgentsOrchestrator()
 
         # Execute complex multi-agent task
-        task_description = "Research the latest Python web frameworks, analyze their features, and provide code examples"
+        task_description = ("Research the latest Python web frameworks, "
+                            "analyze their features, and provide code examples")
 
         result = orchestrator.execute_multi_agent_task(
             task_description=task_description,
