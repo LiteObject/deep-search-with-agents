@@ -4,7 +4,7 @@ A comprehensive intelligent web search system with **three distinct implementati
 
 ## What Makes This "Deep" Search?
 
-Unlike traditional search that returns raw results, **Deep Search Agents** employ sophisticated multi-step reasoning:
+Unlike tra**Entry point**: `cd deep_agents_custom && streamlit run app.py`itional search that returns raw results, **Deep Search Agents** employ sophisticated multi-step reasoning:
 
 **Intelligent Agent Selection**: Automatically chooses the best agent (Research, News, or General) based on query analysis
 **Multi-Source Synthesis**: Combines results from multiple search engines (DuckDuckGo, Tavily, Wikipedia)
@@ -28,20 +28,24 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 
 ```
 deep-search-with-agents/
-├── agents/                          # Primary implementation (production-ready)
-│   ├── base_agent.py                # Base agent class with SearchResult/SearchSummary
-│   ├── research_agent.py            # Academic/research focused agent
-│   ├── news_agent.py                # News and current events agent  
-│   ├── general_agent.py             # General-purpose web search agent
-│   └── search_orchestrator.py       # Multi-agent coordination and auto-selection
-├── tools/                           # Search and processing tools
-│   ├── web_search.py                # WebSearchManager, DuckDuckGo, Tavily, Wikipedia
-│   └── summarizer.py                # LLMSummarizer and SimpleSummarizer
-├── config/                          # Configuration management
-│   └── settings.py                  # Application settings and validation
-├── utils/                           # Helper utilities
-│   ├── logger.py                    # Logging configuration
-│   └── helpers.py                   # Utility functions
+├── deep_agents_custom/              # Custom implementation (production-ready)
+│   ├── agents/                      # Custom agents and orchestrator
+│   │   ├── base_agent.py            # Base agent class with SearchResult/SearchSummary
+│   │   ├── research_agent.py        # Academic/research focused agent
+│   │   ├── news_agent.py            # News and current events agent  
+│   │   ├── general_agent.py         # General-purpose web search agent
+│   │   └── search_orchestrator.py   # Multi-agent coordination and auto-selection
+│   ├── tools/                       # Search and processing tools
+│   │   ├── web_search.py            # WebSearchManager, DuckDuckGo, Tavily, Wikipedia
+│   │   └── summarizer.py            # LLMSummarizer and SimpleSummarizer
+│   ├── config/                      # Configuration management
+│   │   └── settings.py              # Application settings and validation
+│   ├── utils/                       # Helper utilities
+│   │   ├── logger.py                # Logging configuration
+│   │   └── helpers.py               # Utility functions
+│   ├── app.py                       # Custom Streamlit web interface
+│   ├── main.py                      # Custom CLI interface
+│   └── basic_test.py                # Basic functionality test
 ├── deep_agents_with_langchain/      # LangChain-based implementation
 │   ├── agents/                      # LangChain agents with advanced features
 │   │   ├── base_deep_agent.py       # LangChain base agent
@@ -65,9 +69,6 @@ deep-search-with-agents/
 │   ├── config/                      # Official configuration
 │   ├── demo.py                      # Official demo
 │   └── example_usage.py             # Usage examples
-├── app.py                           # Primary Streamlit web interface
-├── main.py                          # Primary CLI interface
-├── basic_test.py                    # Basic functionality test
 ├── requirements.txt                 # Python dependencies
 ├── .env.example                     # Environment variables template
 └── README.md                        # This documentation
@@ -98,18 +99,21 @@ cp .env.example .env
 
 ### Running the Application
 
-#### **Primary Implementation (Root)**
-When you run from the root directory, you'll use the **Primary Implementation** (production-ready, optimized):
+#### **Custom Implementation (Production-Ready)**
+The custom implementation provides lightweight, fast performance without heavy dependencies:
 
 **Web Interface (Recommended)**
 ```bash
+cd deep_agents_custom
 streamlit run app.py
 ```
-*Uses: `/agents`, `/tools`, `/config`, `/utils` - Primary implementation*  
+*Uses: `deep_agents_custom/` - Custom implementation*  
 Access at: http://localhost:8501
 
 **Command Line Interface**
 ```bash
+cd deep_agents_custom
+
 # Basic search with auto-agent selection
 python main.py search "artificial intelligence trends 2024"
 
@@ -490,18 +494,21 @@ MIT License - see LICENSE file for details.
 
 #### **Primary/Root Variant**
 ```bash
-# Web interface - uses primary implementation (/agents, /tools)
+# Web interface - uses custom implementation
+cd deep_agents_custom
 streamlit run app.py
 
-# CLI examples - uses primary implementation
+# CLI examples - uses custom implementation
+cd deep_agents_custom
 python main.py search "your query here"
 python main.py search "research topic" --agent research
 python main.py multi "topic" --agents research news general
 python main.py comprehensive "deep analysis topic"
 python main.py capabilities
 
-# Test primary implementation
-python basic_test.py
+# Test custom implementation
+cd deep_agents_custom
+python -c "from agents.search_orchestrator import SearchOrchestrator; print('Test successful')"
 ```
 
 ### **Alternative Implementations**
@@ -521,7 +528,7 @@ python example_usage.py                 # Official examples
 
 | Command | Implementation Used | Features |
 |---------|-------------------|----------|
-| `streamlit run app.py` (root) | **Custom Primary** | Production-ready, optimized, enhanced features |
-| `python main.py` (root) | **Custom Primary** | Fast, stable, dynamic year detection |
+| `cd deep_agents_custom && streamlit run app.py` | **Custom Primary** | Production-ready, optimized, enhanced features |
+| `cd deep_agents_custom && python main.py` | **Custom Primary** | Fast, stable, dynamic year detection |
 | `cd deep_agents_with_langchain && streamlit run app.py` | **LangChain** | Advanced AI, reflection loops |
 | `cd deep_agents_official && python demo.py` | **Official** | Package standards |

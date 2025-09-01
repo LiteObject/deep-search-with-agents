@@ -3,8 +3,6 @@ Base Agent class for all search agents.
 Provides common functionality and interface for specialized agents.
 """
 
-import os
-import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -54,23 +52,19 @@ class BaseAgent(ABC):
     def _initialize_common_components(self):
         """Initialize common components used by all agents"""
         try:
-            from tools.web_search import WebSearchManager
-            from tools.summarizer import LLMSummarizer, SimpleSummarizer
+            from tools.web_search import WebSearchManager  # pylint: disable=import-outside-toplevel
+            from tools.summarizer import LLMSummarizer, SimpleSummarizer  # pylint: disable=import-outside-toplevel
+            if self.search_manager is None:
+                self.search_manager = WebSearchManager()
 
+            if self.summarizer is None:
+                # Try to use LLM summarizer, fallback to simple
+                try:
+                    self.summarizer = LLMSummarizer()
+                except (ImportError, AttributeError):
+                    self.summarizer = SimpleSummarizer()
         except ImportError as e:
-            # Handle missing modules gracefully
             self.logger.warning("Some tools modules not available: %s", str(e))
-            return
-
-        if self.search_manager is None:
-            self.search_manager = WebSearchManager()
-
-        if self.summarizer is None:
-            # Try to use LLM summarizer, fallback to simple
-            try:
-                self.summarizer = LLMSummarizer()
-            except (ImportError, AttributeError):
-                self.summarizer = SimpleSummarizer()
 
     def _create_search_summary(self, *, query: str, summary: str,
                                results_data: Dict[str, Any]) -> SearchSummary:
