@@ -390,8 +390,8 @@ This project offers **three distinct implementations** of deep search agents, ea
 
 ### **"Deep" vs Traditional Search - What's the Difference?**
 
-**Traditional Search**: Single query → Single engine → Raw results
-**Deep Search Agents**: Multi-step reasoning → Multi-source → Intelligent synthesis
+- **Traditional Search**: Single query → Single engine → Raw results
+- **Deep Search Agents**: Multi-step reasoning → Multi-source → Intelligent synthesis
 
 **Deep Agent Capabilities:**
 1. **Multi-Agent Orchestration**: Different agents for different domains
