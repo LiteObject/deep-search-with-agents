@@ -2,9 +2,13 @@
 News Agent - Specialized for current events and news searches.
 """
 
+# Standard library imports
 import time
+from datetime import datetime
 from typing import List
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary  # pylint: disable=import-error
+
+# First-party imports
+from agents.base_agent import BaseAgent, SearchResult, SearchSummary
 
 
 class NewsAgent(BaseAgent):
@@ -44,25 +48,23 @@ class NewsAgent(BaseAgent):
         enhanced_query = self._enhance_news_query(
             query, kwargs.get('time_filter', 'month'))
 
-        # Check if search manager is available
+        # Ensure search_manager is initialized
         if self.search_manager is None:
-            self.logger.error(
-                "Search manager not available - cannot perform search")
-            return SearchSummary(
-                query=query,
-                summary="Search functionality not available - missing dependencies",
-                key_points=["Search tools not properly initialized"],
-                sources=[],
-                total_results=0,
-                search_time=0.0
-            )
+            self._initialize_common_components()
 
-        # Search for news with recent content preference
-        results = self.search_manager.multi_search(
-            enhanced_query,
-            engines=['duckduckgo'],
-            max_results_per_engine=self.max_results
-        )
+        # If still None after initialization, handle gracefully
+        if self.search_manager is None:
+            # Fallback to simple single-engine search
+            from tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel
+            ddg_search = DuckDuckGoSearch()
+            results = ddg_search.search(enhanced_query, self.max_results)
+        else:
+            # Search for news with recent content preference
+            results = self.search_manager.multi_search(
+                enhanced_query,
+                engines=['duckduckgo'],
+                max_results_per_engine=self.max_results
+            )
 
         # Filter and rank by news relevance
         filtered_results = self._filter_news_results(results)
@@ -158,8 +160,9 @@ class NewsAgent(BaseAgent):
                     score += 1
 
             # Check for temporal indicators
-            temporal_words = ['today', 'yesterday',
-                              '2024', '2023', 'hours ago', 'minutes ago']
+            current_year = datetime.now().year
+            temporal_words = ['today', 'yesterday', 'hours ago', 'minutes ago',
+                              str(current_year), str(current_year - 1)]
             for word in temporal_words:
                 if word in title_content:
                     score += 2

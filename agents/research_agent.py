@@ -4,7 +4,7 @@ Research Agent - Specialized for academic and research-focused searches.
 
 import time
 from typing import List
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary  # pylint: disable=import-error
+from agents.base_agent import BaseAgent, SearchResult, SearchSummary
 
 
 class ResearchAgent(BaseAgent):
@@ -42,19 +42,6 @@ class ResearchAgent(BaseAgent):
         # Enhance query for research
         enhanced_query = self._enhance_research_query(
             query, kwargs.get('focus_academic', True))
-
-        # Check if search manager is available
-        if self.search_manager is None:
-            self.logger.error(
-                "Search manager not available - cannot perform search")
-            return SearchSummary(
-                query=query,
-                summary="Search functionality not available - missing dependencies",
-                key_points=["Search tools not properly initialized"],
-                sources=[],
-                total_results=0,
-                search_time=0.0
-            )
 
         # Search multiple sources
         search_engines = ['duckduckgo']
@@ -181,19 +168,6 @@ class ResearchAgent(BaseAgent):
         Returns:
             str: Research summary
         """
-        if self.summarizer is None:
-            # Fallback when summarizer is not available
-            if not results:
-                return "No research results found."
-
-            summary_lines = [f"Found {len(results)} research results:"]
-            for i, result in enumerate(results[:5], 1):
-                summary_lines.append(f"{i}. {result.title}")
-                summary_lines.append(f"   Source: {result.source}")
-                summary_lines.append(f"   {result.content[:150]}...")
-                summary_lines.append("")
-            return "\n".join(summary_lines)
-
         if hasattr(self.summarizer, 'summarize_results'):
             return self.summarizer.summarize_results(
                 results, "research query")

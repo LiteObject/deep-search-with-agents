@@ -2,9 +2,12 @@
 General Agent - For broad, general-purpose searches.
 """
 
+# Standard library imports
 import time
 from typing import List
-from agents.base_agent import BaseAgent, SearchResult, SearchSummary  # pylint: disable=import-error
+
+# First-party imports
+from agents.base_agent import BaseAgent, SearchResult, SearchSummary
 
 
 class GeneralAgent(BaseAgent):
@@ -48,25 +51,23 @@ class GeneralAgent(BaseAgent):
         # Use override if provided, otherwise use instance max_results
         max_results = kwargs.get('max_results_override', self.max_results)
 
-        # Check if search manager is available
+        # Ensure search_manager is initialized
         if self.search_manager is None:
-            self.logger.error(
-                "Search manager not available - cannot perform search")
-            return SearchSummary(
-                query=query,
-                summary="Search functionality not available - missing dependencies",
-                key_points=["Search tools not properly initialized"],
-                sources=[],
-                total_results=0,
-                search_time=0.0
-            )
+            self._initialize_common_components()
 
-        # Perform multi-engine search
-        results = self.search_manager.multi_search(
-            query,
-            engines=engines,
-            max_results_per_engine=max_results // len(engines)
-        )
+        # If still None after initialization, handle gracefully
+        if self.search_manager is None:
+            # Fallback to simple single-engine search
+            from tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel,import-error
+            ddg_search = DuckDuckGoSearch()
+            results = ddg_search.search(query, max_results)
+        else:
+            # Perform multi-engine search
+            results = self.search_manager.multi_search(
+                query,
+                engines=engines,
+                max_results_per_engine=max_results // len(engines)
+            )
 
         # Process and filter results
         processed_results = self._filter_general_results(results)

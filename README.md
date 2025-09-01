@@ -1,11 +1,11 @@
 # Deep Search with Agents
 
-A comprehensive intelligent web search system with **three distinct implementations** of AI agents that perform specialized, multi-step web searches. The system automatically selects optimal agents based on query type and provides deep insights across various domains.
+A comprehensive intelligent web search system with **two distinct implementations** of AI agents that perform specialized, multi-step web searches. The system automatically selects optimal agents based on query type and provides deep insights across various domains.
 
 ## Key Features
 
 - **Multi-Agent Architecture**: Specialized agents for research, news, and general searches
-- **Three Implementation Approaches**: Choose from custom, LangChain, or official patterns
+- **Two Implementation Approaches**: Choose from custom or official patterns
 - **Multiple Search Engines**: DuckDuckGo, Tavily, Wikipedia integration
 - **AI-Powered Intelligence**: LLM-based summarization and insight extraction
 - **Interactive Interfaces**: Both Streamlit web app and CLI available
@@ -17,7 +17,7 @@ A comprehensive intelligent web search system with **three distinct implementati
 
 ```
 deep-search-with-agents/
-├── agents/                           # Main implementation (lightweight)
+├── agents/                           # Primary implementation (production-ready)
 │   ├── base_agent.py                # Base agent class with SearchResult/SearchSummary
 │   ├── research_agent.py            # Academic/research focused agent
 │   ├── news_agent.py                # News and current events agent  
@@ -31,13 +31,6 @@ deep-search-with-agents/
 ├── utils/                           # Helper utilities
 │   ├── logger.py                    # Logging configuration
 │   └── helpers.py                   # Utility functions
-├── deep_agents_without_langchain/   # Standalone copy of main implementation
-│   ├── agents/                      # Mirror of main agents
-│   ├── tools/                       # Mirror of main tools
-│   ├── config/                      # Mirror of main config
-│   ├── utils/                       # Mirror of main utils
-│   ├── app.py                       # Standalone Streamlit app
-│   └── main.py                      # Standalone CLI
 ├── deep_agents_with_langchain/      # LangChain-based implementation
 │   ├── agents/                      # LangChain agents with advanced features
 │   │   ├── base_deep_agent.py       # LangChain base agent
@@ -61,8 +54,8 @@ deep-search-with-agents/
 │   ├── config/                      # Official configuration
 │   ├── demo.py                      # Official demo
 │   └── example_usage.py             # Usage examples
-├── app.py                           # Main Streamlit web interface
-├── main.py                          # Main CLI interface
+├── app.py                           # Primary Streamlit web interface
+├── main.py                          # Primary CLI interface
 ├── basic_test.py                    # Basic functionality test
 ├── requirements.txt                 # Python dependencies
 ├── .env.example                     # Environment variables template
@@ -94,14 +87,14 @@ cp .env.example .env
 
 ### Running the Application
 
-#### **Default Implementation (Main/Root)**
-When you run from the root directory, you'll use the **Main Implementation** (lightweight, production-ready):
+#### **Primary Implementation (Root)**
+When you run from the root directory, you'll use the **Primary Implementation** (production-ready, optimized):
 
 **Web Interface (Recommended)**
 ```bash
 streamlit run app.py
 ```
-*Uses: `/agents`, `/tools`, `/config`, `/utils` - Main implementation*  
+*Uses: `/agents`, `/tools`, `/config`, `/utils` - Primary implementation*  
 Access at: http://localhost:8501
 
 **Command Line Interface**
@@ -134,15 +127,6 @@ streamlit run app.py
 python main.py search "your query here"
 ```
 *Features: Reflection loops, hierarchical planning, advanced coordination*
-
-**Standalone Implementation (Copy of Main)**
-```bash
-cd deep_agents_without_langchain  
-streamlit run app.py
-# OR
-python main.py search "your query here"
-```
-*Features: Identical to main, useful for isolated testing*
 
 **Official DeepAgents Implementation**
 ```bash
@@ -321,23 +305,28 @@ LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNIN
 - **Logging**: Comprehensive logging with configurable levels
 - **Settings Validation**: Automatic configuration validation on startup
 
-## Implementation Choices
+## 🏗️ Implementation Choices
 
-### 1. Main Implementation (`/agents`, `/tools`, `/config`, `/utils`)
-**Best for**: Production use, minimal dependencies, performance-focused
-- Lightweight with no LangChain dependency
-- Direct API integrations for maximum control
-- Fast startup and execution
-- Comprehensive error handling
+### 1. **Custom Implementation** (`/agents`, `/tools`, `/config`, `/utils`)
+**Best for**: Production use, direct access, optimal performance
+- ✅ Lightweight with no LangChain dependency
+- ✅ Direct API integrations for maximum control
+- ✅ Fast startup and execution
+- ✅ Comprehensive error handling
+- ✅ Dynamic year detection for temporal searches
+- ✅ Enhanced error handling and debugging
+- ✅ Located in root directories for immediate access
+- ✅ Direct imports optimized for production
+- Entry point: `streamlit run app.py` (from root)
 
-### 2. LangChain Implementation (`/deep_agents_with_langchain`)
+### 2. **LangChain Implementation** (`/deep_agents_with_langchain`)
 **Best for**: Advanced AI features, complex workflows, experimentation
 - Advanced hierarchical planning and reflection loops
 - Multi-agent collaboration with sophisticated coordination
 - Built-in LangChain tools and integrations
 - Experimental features and cutting-edge capabilities
 
-### 3. Official DeepAgents (`/deep_agents_official`)
+### 3. **Official DeepAgents** (`/deep_agents_official`)
 **Best for**: Following established patterns, community compatibility
 - Uses official deepagents package conventions
 - Virtual file system integration
@@ -349,10 +338,6 @@ LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNIN
 ### Run Tests
 ```bash
 # Basic functionality test
-python basic_test.py
-
-# Test specific implementation
-cd deep_agents_without_langchain
 python basic_test.py
 
 # Test with pytest (if test files exist)
@@ -420,19 +405,21 @@ MIT License - see LICENSE file for details.
 
 ## 🎯 Quick Commands Reference
 
-### **Default (Main Implementation)**
+### **Custom Implementation (Primary)**
+
+#### **Primary/Root Variant**
 ```bash
-# Web interface - uses main implementation (/agents, /tools)
+# Web interface - uses primary implementation (/agents, /tools)
 streamlit run app.py
 
-# CLI examples - uses main implementation
+# CLI examples - uses primary implementation
 python main.py search "your query here"
 python main.py search "research topic" --agent research
 python main.py multi "topic" --agents research news general
 python main.py comprehensive "deep analysis topic"
 python main.py capabilities
 
-# Test main implementation
+# Test primary implementation
 python basic_test.py
 ```
 
@@ -442,11 +429,6 @@ python basic_test.py
 cd deep_agents_with_langchain
 streamlit run app.py                    # LangChain web interface
 python main.py search "query"           # LangChain CLI
-
-# Standalone implementation (mirror of main)
-cd deep_agents_without_langchain
-streamlit run app.py                    # Standalone web interface  
-python main.py search "query"           # Standalone CLI
 
 # Official patterns implementation
 cd deep_agents_official
@@ -458,8 +440,7 @@ python example_usage.py                 # Official examples
 
 | Command | Implementation Used | Features |
 |---------|-------------------|----------|
-| `streamlit run app.py` (root) | **Main** (`/agents`) | Production-ready, lightweight |
-| `python main.py` (root) | **Main** (`/agents`) | Fast, minimal dependencies |
+| `streamlit run app.py` (root) | **Custom Primary** | Production-ready, optimized, enhanced features |
+| `python main.py` (root) | **Custom Primary** | Fast, stable, dynamic year detection |
 | `cd deep_agents_with_langchain && streamlit run app.py` | **LangChain** | Advanced AI, reflection loops |
-| `cd deep_agents_without_langchain && streamlit run app.py` | **Standalone** | Isolated copy of main |
 | `cd deep_agents_official && python demo.py` | **Official** | Package standards |
