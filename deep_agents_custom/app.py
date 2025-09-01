@@ -37,7 +37,7 @@ def main():
     """Main Streamlit application"""
 
     # Header
-    st.title("🔍 Deep Search Agents")
+    st.title("Deep Search Agents")
     st.markdown("*Intelligent web search using specialized AI agents*")
 
     # Sidebar
@@ -124,41 +124,33 @@ def create_sidebar():
 def create_main_interface():
     """Create main search interface"""
 
-    # Search input
-    col1, col2 = st.columns([4, 1])
+    # Search input with proper alignment
+    with st.container():
+        st.markdown("**Search Query:**")
+        col1, col2 = st.columns([4, 1])
 
-    with col1:
-        query = st.text_input(
-            "Enter your search query:",
-            placeholder="e.g., artificial intelligence trends 2024",
-            key="search_query"
-        )
+        with col1:
+            query = st.text_input(
+                "search_input",
+                placeholder="e.g., artificial intelligence trends 2024",
+                key="search_query",
+                label_visibility="collapsed"
+            )
 
-    with col2:
-        search_button = st.button(
-            "🔍 Search", type="primary", use_container_width=True)
+        with col2:
+            search_button = st.button(
+                "Search", type="primary", use_container_width=True)
 
     # Example queries
-    st.markdown("**Example queries:**")
-    example_cols = st.columns(3)
-
-    with example_cols[0]:
-        if st.button("🔬 Latest AI research"):
-            st.session_state.search_query = (
-                "latest artificial intelligence research 2024"
-            )
-            st.rerun()
-
-    with example_cols[1]:
-        if st.button("📰 Tech news today"):
-            st.session_state.search_query = "technology news today"
-            st.rerun()
-
-    with example_cols[2]:
-        if st.button("🌐 Climate change impact"):
-            st.session_state.search_query = ("climate change environmental "
-                                             "impact")
-            st.rerun()
+    st.markdown("""
+    **Example queries:**
+    - 🔬 Latest artificial intelligence research
+    - 📰 Technology news today
+    - 🌐 Climate change environmental impact
+    - 💼 Remote work productivity tips
+    - � Latest medical breakthroughs
+    - 🚀 Space exploration updates
+    """)
 
     # Perform search
     if search_button and query:
