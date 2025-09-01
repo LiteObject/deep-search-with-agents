@@ -94,10 +94,14 @@ cp .env.example .env
 
 ### Running the Application
 
+#### **Default Implementation (Main/Root)**
+When you run from the root directory, you'll use the **Main Implementation** (lightweight, production-ready):
+
 **Web Interface (Recommended)**
 ```bash
 streamlit run app.py
 ```
+*Uses: `/agents`, `/tools`, `/config`, `/utils` - Main implementation*  
 Access at: http://localhost:8501
 
 **Command Line Interface**
@@ -119,6 +123,35 @@ python main.py comprehensive "renewable energy technologies"
 # Show system capabilities
 python main.py capabilities
 ```
+
+#### **Alternative Implementations**
+
+**LangChain Implementation (Advanced Features)**
+```bash
+cd deep_agents_with_langchain
+streamlit run app.py
+# OR
+python main.py search "your query here"
+```
+*Features: Reflection loops, hierarchical planning, advanced coordination*
+
+**Standalone Implementation (Copy of Main)**
+```bash
+cd deep_agents_without_langchain  
+streamlit run app.py
+# OR
+python main.py search "your query here"
+```
+*Features: Identical to main, useful for isolated testing*
+
+**Official DeepAgents Implementation**
+```bash
+cd deep_agents_official
+python demo.py
+# OR
+python example_usage.py
+```
+*Features: Official package patterns, community standards*
 
 **Test Basic Functionality**
 ```bash
@@ -385,23 +418,48 @@ MIT License - see LICENSE file for details.
 
 ---
 
-## Quick Commands Reference
+## 🎯 Quick Commands Reference
 
+### **Default (Main Implementation)**
 ```bash
-# Start web interface
+# Web interface - uses main implementation (/agents, /tools)
 streamlit run app.py
 
-# CLI search examples  
+# CLI examples - uses main implementation
 python main.py search "your query here"
 python main.py search "research topic" --agent research
 python main.py multi "topic" --agents research news general
 python main.py comprehensive "deep analysis topic"
 python main.py capabilities
 
-# Test functionality
+# Test main implementation
 python basic_test.py
-
-# Alternative implementations
-cd deep_agents_with_langchain && python main.py search "query"
-cd deep_agents_official && python demo.py
 ```
+
+### **Alternative Implementations**
+```bash
+# LangChain implementation (advanced features)
+cd deep_agents_with_langchain
+streamlit run app.py                    # LangChain web interface
+python main.py search "query"           # LangChain CLI
+
+# Standalone implementation (mirror of main)
+cd deep_agents_without_langchain
+streamlit run app.py                    # Standalone web interface  
+python main.py search "query"           # Standalone CLI
+
+# Official patterns implementation
+cd deep_agents_official
+python demo.py                          # Official demo
+python example_usage.py                 # Official examples
+```
+
+## 📋 **Implementation Summary**
+
+| Command | Implementation Used | Features |
+|---------|-------------------|----------|
+| `streamlit run app.py` (root) | **Main** (`/agents`) | Production-ready, lightweight |
+| `python main.py` (root) | **Main** (`/agents`) | Fast, minimal dependencies |
+| `cd deep_agents_with_langchain && streamlit run app.py` | **LangChain** | Advanced AI, reflection loops |
+| `cd deep_agents_without_langchain && streamlit run app.py` | **Standalone** | Isolated copy of main |
+| `cd deep_agents_official && python demo.py` | **Official** | Package standards |
