@@ -6,12 +6,12 @@ A comprehensive intelligent web search system with **three distinct implementati
 
 Unlike traditional search that returns raw results, **Deep Search Agents** employ sophisticated multi-step reasoning:
 
-**Intelligent Agent Selection**: Automatically chooses the best agent (Research, News, or General) based on query analysis
-**Multi-Source Synthesis**: Combines results from multiple search engines (DuckDuckGo, Tavily, Wikipedia)
-**Concurrent Processing**: Parallel searches with intelligent result ranking and deduplication
-**Context-Aware Summarization**: Extracts key insights and creates coherent summaries
-**Temporal Intelligence**: Understands time-sensitive queries and prioritizes recent content
-**Deep Analysis**: Goes beyond simple keyword matching to provide contextual understanding
+- **Intelligent Agent Selection**: Automatically chooses the best agent (Research, News, or General) based on query analysis
+- **Multi-Source Synthesis**: Combines results from multiple search engines (DuckDuckGo, Tavily, Wikipedia)
+- **Concurrent Processing**: Parallel searches with intelligent result ranking and deduplication
+- **Context-Aware Summarization**: Extracts key insights and creates coherent summaries
+- **Temporal Intelligence**: Understands time-sensitive queries and prioritizes recent content
+- **Deep Analysis**: Goes beyond simple keyword matching to provide contextual understanding
 
 ## Key Features
 
