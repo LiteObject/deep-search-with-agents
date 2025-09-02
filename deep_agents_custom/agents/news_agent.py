@@ -60,9 +60,15 @@ class NewsAgent(BaseAgent):
             results = ddg_search.search(enhanced_query, self.max_results)
         else:
             # Search for news with recent content preference
+            # Use Tavily for better news results if available
+            engines = ['duckduckgo']
+            from config.settings import Settings  # pylint: disable=import-outside-toplevel
+            if Settings.TAVILY_API_KEY:
+                engines = ['tavily', 'duckduckgo']
+            
             results = self.search_manager.multi_search(
                 enhanced_query,
-                engines=['duckduckgo'],
+                engines=engines,
                 max_results_per_engine=self.max_results
             )
 

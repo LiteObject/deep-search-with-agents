@@ -8,6 +8,7 @@ from typing import List
 
 # First-party imports
 from .base_agent import BaseAgent, SearchResult, SearchSummary
+from config.settings import Settings  # type: ignore # pylint: disable=import-error
 
 
 class GeneralAgent(BaseAgent):
@@ -43,8 +44,12 @@ class GeneralAgent(BaseAgent):
         """
         start_time = time.time()
 
-        # Default engines
-        engines = kwargs.get('engines', ['duckduckgo'])
+        # Default engines with Tavily if available
+        default_engines = ['duckduckgo']
+        if Settings.TAVILY_API_KEY:
+            default_engines.insert(0, 'tavily')  # Prioritize Tavily for better results
+        
+        engines = kwargs.get('engines', default_engines)
         if kwargs.get('include_wikipedia', True):
             engines.append('wikipedia')
 
@@ -233,8 +238,12 @@ class GeneralAgent(BaseAgent):
             SearchSummary: Quick search results
         """
         # Use a limited max_results for quick search without modifying the instance
+        quick_engines = ['duckduckgo']
+        if Settings.TAVILY_API_KEY:
+            quick_engines = ['tavily']  # Use Tavily for faster, better quick results
+        
         result = self.search(
-            query, engines=['duckduckgo'], max_results_override=5)
+            query, engines=quick_engines, max_results_override=5)
         return result
 
     def comprehensive_search(self, query: str) -> SearchSummary:
@@ -248,9 +257,13 @@ class GeneralAgent(BaseAgent):
             SearchSummary: Comprehensive search results
         """
         # Use extended max_results for comprehensive search without modifying the instance
+        comprehensive_engines = ['duckduckgo', 'wikipedia']
+        if Settings.TAVILY_API_KEY:
+            comprehensive_engines = ['tavily', 'duckduckgo', 'wikipedia']  # Include all for comprehensive results
+        
         result = self.search(
             query,
-            engines=['duckduckgo', 'wikipedia'],
+            engines=comprehensive_engines,
             include_wikipedia=True,
             max_results_override=25
         )

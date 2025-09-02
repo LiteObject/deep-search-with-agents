@@ -4,10 +4,14 @@ Application settings and configuration.
 
 import os
 from typing import Dict, Any
+from pathlib import Path
 from dotenv import load_dotenv  # type: ignore
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from root directory
+# Get the root directory (parent of deep_agents_custom)
+current_dir = Path(__file__).parent.parent.parent
+env_path = current_dir / '.env'
+load_dotenv(env_path)
 
 
 class Settings:

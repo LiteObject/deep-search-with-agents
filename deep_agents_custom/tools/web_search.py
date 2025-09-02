@@ -10,6 +10,7 @@ from typing import List, Optional
 import requests  # type: ignore
 
 from agents.base_agent import SearchResult  # type: ignore # pylint: disable=import-error
+from config.settings import Settings  # type: ignore # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
@@ -37,28 +38,28 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
             List[SearchResult]: Search results
         """
         try:
-            # Use duckduckgo-search library for better results
-            # type: ignore  # pylint: disable=import-outside-toplevel
-            from duckduckgo_search import DDGS
+            # Use ddgs library for better results
+            from ddgs import DDGS  # type: ignore  # pylint: disable=import-outside-toplevel
 
             results = []
             try:
-                with DDGS() as ddgs:
-                    search_results = ddgs.text(query, max_results=max_results)
+                # Updated initialization for newer versions of duckduckgo-search
+                ddgs = DDGS()
+                search_results = ddgs.text(query, max_results=max_results)
 
-                    for i, result in enumerate(search_results):
-                        if i >= max_results:
-                            break
+                for i, result in enumerate(search_results):
+                    if i >= max_results:
+                        break
 
-                        search_result = SearchResult(
-                            title=result.get('title') or '',
-                            url=result.get('href') or '',
-                            content=result.get('body') or '',
-                            source='duckduckgo',
-                            timestamp=datetime.now(),
-                            relevance_score=1.0 - (i * 0.1)  # Simple scoring
-                        )
-                        results.append(search_result)
+                    search_result = SearchResult(
+                        title=result.get('title') or '',
+                        url=result.get('href') or '',
+                        content=result.get('body') or '',
+                        source='duckduckgo',
+                        timestamp=datetime.now(),
+                        relevance_score=1.0 - (i * 0.1)  # Simple scoring
+                    )
+                    results.append(search_result)
             except Exception as ddgs_error:  # pylint: disable=broad-exception-caught
                 logger.error(
                     "DuckDuckGo DDGS initialization error: %s", str(ddgs_error))
@@ -115,7 +116,7 @@ class TavilySearch:  # pylint: disable=too-few-public-methods
     """Tavily search implementation"""
 
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv('TAVILY_API_KEY')
+        self.api_key = api_key or Settings.TAVILY_API_KEY
         if not self.api_key:
             logger.warning(
                 "Tavily API key not found. Tavily search will not work.")
@@ -292,7 +293,12 @@ class WebSearchManager:
         Returns:
             List[SearchResult]: Combined search results
         """
-        engines = engines or ['duckduckgo', 'wikipedia']
+        if engines is None:
+            # Use all available engines by default, prioritizing Tavily if available
+            engines = ['duckduckgo', 'wikipedia']
+            if Settings.TAVILY_API_KEY:
+                engines.insert(0, 'tavily')  # Add Tavily first for better results
+        
         all_results = []
 
         for engine in engines:
