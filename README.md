@@ -28,23 +28,37 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 
 ```
 deep-search-with-agents/
-├── deep_agents_custom/              # Custom implementation (production-ready)
+├── .env.example                     # Environment variables template
+├── .gitignore                       # Git ignore rules
+├── .pylintrc                        # Pylint configuration
+├── README.md                        # This documentation
+├── requirements.txt                 # Python dependencies
+├── app.py                           # (Empty - legacy file)
+├── main.py                          # (Empty - legacy file)
+├── basic_test.py                    # (Empty - legacy file)
+├── logs/                            # Log files directory (auto-created)
+├── deep_agents_custom/              # ⭐ Custom implementation (production-ready)
+│   ├── __init__.py                  # Package initialization
 │   ├── agents/                      # Custom agents and orchestrator
+│   │   ├── __init__.py              # Package exports
 │   │   ├── base_agent.py            # Base agent class with SearchResult/SearchSummary
 │   │   ├── research_agent.py        # Academic/research focused agent
 │   │   ├── news_agent.py            # News and current events agent  
 │   │   ├── general_agent.py         # General-purpose web search agent
 │   │   └── search_orchestrator.py   # Multi-agent coordination and auto-selection
 │   ├── tools/                       # Search and processing tools
+│   │   ├── __init__.py              # Package exports
 │   │   ├── web_search.py            # WebSearchManager, DuckDuckGo, Tavily, Wikipedia
 │   │   └── summarizer.py            # LLMSummarizer and SimpleSummarizer
 │   ├── config/                      # Configuration management
+│   │   ├── __init__.py              # Package initialization
 │   │   └── settings.py              # Application settings and validation
 │   ├── utils/                       # Helper utilities
+│   │   ├── __init__.py              # Package initialization
 │   │   ├── logger.py                # Logging configuration
 │   │   └── helpers.py               # Utility functions
-│   ├── app.py                       # Custom Streamlit web interface
-│   ├── main.py                      # Custom CLI interface
+│   ├── app.py                       # ⭐ Streamlit web interface (MAIN ENTRY POINT)
+│   ├── main.py                      # CLI interface
 │   └── basic_test.py                # Basic functionality test
 ├── deep_agents_with_langchain/      # LangChain-based implementation
 │   ├── agents/                      # LangChain agents with advanced features
@@ -59,20 +73,19 @@ deep-search-with-agents/
 │   ├── utils/                       # LangChain utilities
 │   ├── app.py                       # LangChain Streamlit app
 │   └── main.py                      # LangChain CLI
-├── deep_agents_official/            # Official DeepAgents package patterns
-│   ├── agents/                      # Official implementation agents
-│   │   ├── research_deep_agent.py   # Research agent using official patterns
-│   │   ├── analysis_deep_agent.py   # Analysis agent
-│   │   ├── coding_deep_agent.py     # Coding agent
-│   │   └── deep_orchestrator.py     # Official orchestrator
-│   ├── tools/                       # Official tools
-│   ├── config/                      # Official configuration
-│   ├── demo.py                      # Official demo
-│   └── example_usage.py             # Usage examples
-├── requirements.txt                 # Python dependencies
-├── .env.example                     # Environment variables template
-└── README.md                        # This documentation
+└── deep_agents_official/            # Official DeepAgents package patterns
+    ├── agents/                      # Official implementation agents
+    │   ├── research_deep_agent.py   # Research agent using official patterns
+    │   ├── analysis_deep_agent.py   # Analysis agent
+    │   ├── coding_deep_agent.py     # Coding agent
+    │   └── deep_orchestrator.py     # Official orchestrator
+    ├── tools/                       # Official tools
+    ├── config/                      # Official configuration
+    ├── demo.py                      # Official demo
+    └── example_usage.py             # Usage examples
 ```
+
+> **📝 Note:** The root-level `app.py`, `main.py`, and `basic_test.py` are empty legacy files. The functional implementations are located in their respective subdirectories (`deep_agents_custom/`, `deep_agents_with_langchain/`, `deep_agents_official/`).
 
 ## Quick Start
 
@@ -163,9 +176,21 @@ python basic_test.py
 
 ## Usage Examples
 
+> **💡 Important:** All Python code examples below assume you're either:
+> 1. **Running from within the `deep_agents_custom` directory** (recommended for CLI/scripts)
+> 2. **Using the path manipulation shown** (for standalone scripts)
+> 3. **Installing as a package** (for advanced users)
+
 ### Basic Search with Auto-Agent Selection
 ```python
+# Import from the deep_agents_custom implementation
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'deep_agents_custom'))
 from agents.search_orchestrator import SearchOrchestrator
+
+# OR if running from within deep_agents_custom directory:
+# from agents.search_orchestrator import SearchOrchestrator
 
 # Initialize orchestrator
 orchestrator = SearchOrchestrator()
@@ -184,9 +209,18 @@ print(f"Search Time: {result.search_time:.2f}s")
 
 ### Using Specific Agents
 ```python
+# Import from the deep_agents_custom implementation
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'deep_agents_custom'))
 from agents.research_agent import ResearchAgent
 from agents.news_agent import NewsAgent
 from agents.general_agent import GeneralAgent
+
+# OR if running from within deep_agents_custom directory:
+# from agents.research_agent import ResearchAgent
+# from agents.news_agent import NewsAgent
+# from agents.general_agent import GeneralAgent
 
 # Academic research (papers, studies, scholarly content)
 research_agent = ResearchAgent()
@@ -206,7 +240,14 @@ print(f"General Summary: {general_result.summary}")
 
 ### Multi-Agent Comparison
 ```python
+# Import from the deep_agents_custom implementation
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'deep_agents_custom'))
 from agents.search_orchestrator import SearchOrchestrator, SearchType
+
+# OR if running from within deep_agents_custom directory:
+# from agents.search_orchestrator import SearchOrchestrator, SearchType
 
 orchestrator = SearchOrchestrator()
 
@@ -226,7 +267,14 @@ for agent_type, agent_result in results.items():
 
 ### Comprehensive Search
 ```python
+# Import from the deep_agents_custom implementation
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'deep_agents_custom'))
 from agents.search_orchestrator import SearchOrchestrator
+
+# OR if running from within deep_agents_custom directory:
+# from agents.search_orchestrator import SearchOrchestrator
 
 orchestrator = SearchOrchestrator()
 
@@ -415,10 +463,7 @@ This project offers **three distinct implementations** of deep search agents, ea
 | **Learning Deep Agents** | Official Implementation | Standard patterns, community best practices |
 | **Quick Start/Demo** | Custom Implementation | Fastest setup, works out of the box |
 | **Complex AI Workflows** | LangChain Implementation | Hierarchical planning, meta-reasoning |
-- Uses official deepagents package conventions
-- Virtual file system integration
-- TodoWrite planning tools
-- Community-standard implementations
+| **Community Standards** | Official Implementation | Uses official deepagents package conventions, virtual file system integration, TodoWrite planning tools |
 
 ---
 
@@ -426,12 +471,16 @@ This project offers **three distinct implementations** of deep search agents, ea
 
 ### Run Tests
 ```bash
-# Basic functionality test
+# Basic functionality test (main implementation)
 cd deep_agents_custom
 python basic_test.py
 
-# Test with pytest (if test files exist)
-python -m pytest tests/ -v
+# Test import functionality
+cd deep_agents_custom
+python -c "from agents.search_orchestrator import SearchOrchestrator; print('✅ Imports working')"
+
+# Note: pytest tests would be run from the respective implementation directories
+# if test files exist in the future
 ```
 
 ### Development Setup
@@ -496,8 +545,6 @@ MIT License - see LICENSE file for details.
 ## Quick Commands Reference
 
 ### **Custom Implementation (Primary)**
-
-#### **Custom Implementation (Primary)**
 ```bash
 # Web interface - production-ready custom implementation
 cd deep_agents_custom
