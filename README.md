@@ -99,7 +99,7 @@ cp .env.example .env
 
 ### Running the Application
 
-#### **Custom Implementation (Production-Ready)**
+#### **Custom Implementation**
 The custom implementation provides lightweight, fast performance without heavy dependencies:
 
 **Web Interface (Recommended)**
