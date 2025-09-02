@@ -76,6 +76,9 @@ deep-search-with-agents/
 
 ## Quick Start
 
+> **🚀 Primary Entry Point:** `cd deep_agents_custom && streamlit run app.py`  
+> The main production-ready implementation is in the `deep_agents_custom/` directory.
+
 ### Installation
 ```bash
 # Clone repository
@@ -154,6 +157,7 @@ python example_usage.py
 
 **Test Basic Functionality**
 ```bash
+cd deep_agents_custom
 python basic_test.py
 ```
 
@@ -423,6 +427,7 @@ This project offers **three distinct implementations** of deep search agents, ea
 ### Run Tests
 ```bash
 # Basic functionality test
+cd deep_agents_custom
 python basic_test.py
 
 # Test with pytest (if test files exist)
@@ -492,13 +497,13 @@ MIT License - see LICENSE file for details.
 
 ### **Custom Implementation (Primary)**
 
-#### **Primary/Root Variant**
+#### **Custom Implementation (Primary)**
 ```bash
-# Web interface - uses custom implementation
+# Web interface - production-ready custom implementation
 cd deep_agents_custom
 streamlit run app.py
 
-# CLI examples - uses custom implementation
+# CLI examples - custom implementation
 cd deep_agents_custom
 python main.py search "your query here"
 python main.py search "research topic" --agent research
