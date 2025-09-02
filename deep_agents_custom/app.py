@@ -9,10 +9,10 @@ import pandas as pd  # type: ignore
 import plotly.express as px  # type: ignore  # pylint: disable=import-error
 import streamlit as st  # type: ignore
 
-from agents.search_orchestrator import SearchOrchestrator, SearchType  # type: ignore
-from config.settings import settings  # type: ignore
-from utils.logger import setup_logging, get_logger  # type: ignore
-from utils.helpers import format_search_time  # type: ignore
+from agents.search_orchestrator import SearchOrchestrator, SearchType  # type: ignore # pylint: disable=import-error
+from config.settings import settings  # type: ignore # pylint: disable=import-error
+from utils.logger import setup_logging, get_logger  # type: ignore # pylint: disable=import-error
+from utils.helpers import format_search_time  # type: ignore # pylint: disable=import-error
 
 # Configure page
 st.set_page_config(
@@ -39,7 +39,7 @@ def main():
     # Header
     st.title("🔬 Deep Research Agents")
     st.markdown("*AI-powered research agents for comprehensive topic analysis*")
-    
+
     # Research description
     st.info("""
     **How it works:** Enter a research topic and our specialized AI agents will:
@@ -229,7 +229,7 @@ def display_single_result(result, agent_name: str):
     """Display single agent search result with research focus"""
 
     st.header(f"🔬 Research Results: {result.query}")
-    
+
     # Research metrics
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -241,7 +241,7 @@ def display_single_result(result, agent_name: str):
 
     # Main research summary (250 words)
     st.subheader("📋 Research Summary")
-    
+
     # Generate or display a research-focused summary
     if hasattr(result, 'summary') and result.summary:
         # Ensure summary is approximately 250 words
@@ -257,12 +257,12 @@ def display_single_result(result, agent_name: str):
                 summary_250 += "..."
         else:
             summary_250 = result.summary
-        
+
         st.write(summary_250)
-        
+
         # Word count display
         word_count = len(summary_250.split())
-        st.caption(f"� Summary: {word_count} words")
+        st.caption(f"📝 Summary: {word_count} words")
     else:
         st.warning("No research summary available for this topic.")
 
@@ -273,8 +273,8 @@ def display_single_result(result, agent_name: str):
             st.write(f"• {point}")
 
     # Reference links for further reading
-    st.subheader("� Reference Links for Further Information")
-    
+    st.subheader("🔗 Reference Links for Further Information")
+
     if hasattr(result, 'results') and result.results:
         # Display top sources with titles and links
         st.write("**Primary Sources:**")
@@ -285,13 +285,13 @@ def display_single_result(result, agent_name: str):
                     st.caption(f"   Source: {source.source}")
             elif hasattr(source, 'url'):
                 st.markdown(f"{i}. **[View Source]({source.url})**")
-    
+
     elif hasattr(result, 'sources') and result.sources:
         # Fallback to basic source links
         st.write("**Source Links:**")
         for i, source_url in enumerate(result.sources[:8], 1):
             st.markdown(f"{i}. [Research Source {i}]({source_url})")
-    
+
     else:
         st.info("No reference links available for this research topic.")
 

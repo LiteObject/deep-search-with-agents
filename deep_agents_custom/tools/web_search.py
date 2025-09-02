@@ -9,7 +9,7 @@ from typing import List, Optional
 
 import requests  # type: ignore
 
-from agents.base_agent import SearchResult  # type: ignore
+from agents.base_agent import SearchResult  # type: ignore # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
@@ -51,15 +51,15 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
                             break
 
                         search_result = SearchResult(
-                            title=result.get('title', ''),
-                            url=result.get('href', ''),
-                            content=result.get('body', ''),
+                            title=result.get('title') or '',
+                            url=result.get('href') or '',
+                            content=result.get('body') or '',
                             source='duckduckgo',
                             timestamp=datetime.now(),
                             relevance_score=1.0 - (i * 0.1)  # Simple scoring
                         )
                         results.append(search_result)
-            except Exception as ddgs_error:
+            except Exception as ddgs_error:  # pylint: disable=broad-exception-caught
                 logger.error(
                     "DuckDuckGo DDGS initialization error: %s", str(ddgs_error))
                 # Fallback to basic search if DDGS fails
@@ -106,7 +106,7 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
 
             return results
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Fallback search also failed: %s", str(e))
             return []
 
@@ -151,9 +151,9 @@ class TavilySearch:  # pylint: disable=too-few-public-methods
             if response and isinstance(response, dict):
                 for result in response.get('results', []):
                     search_result = SearchResult(
-                        title=result.get('title', ''),
-                        url=result.get('url', ''),
-                        content=result.get('content', ''),
+                        title=result.get('title') or '',
+                        url=result.get('url') or '',
+                        content=result.get('content') or '',
                         source='tavily',
                         timestamp=datetime.now(),
                         relevance_score=result.get('score', 0.5)
