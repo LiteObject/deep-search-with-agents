@@ -4,7 +4,7 @@ A comprehensive intelligent web search system with **three distinct implementati
 
 ## What Makes This "Deep" Search?
 
-Unlike tra**Entry point**: `cd deep_agents_custom && streamlit run app.py`itional search that returns raw results, **Deep Search Agents** employ sophisticated multi-step reasoning:
+Unlike traditional search that returns raw results, **Deep Search Agents** employ sophisticated multi-step reasoning:
 
 **Intelligent Agent Selection**: Automatically chooses the best agent (Research, News, or General) based on query analysis
 **Multi-Source Synthesis**: Combines results from multiple search engines (DuckDuckGo, Tavily, Wikipedia)
@@ -344,7 +344,7 @@ This project offers **three distinct implementations** of deep search agents, ea
 - Context-aware summarization with key insight extraction
 - Temporal relevance scoring for news content
 
-**Entry point**: `streamlit run app.py` (from root)
+**Entry point**: `cd deep_agents_custom && streamlit run app.py`
 
 ### 2. **LangChain Implementation** (`/deep_agents_with_langchain`)
 **Philosophy**: Advanced AI capabilities, experimental features
