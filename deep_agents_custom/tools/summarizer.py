@@ -2,42 +2,46 @@
 AI-powered content summarization tools.
 """
 
-import os
 import logging
 from typing import List, Optional
 from agents.base_agent import SearchResult
+from .llm_factory import get_best_llm_client, LLMProvider, get_llm_client
 
 logger = logging.getLogger(__name__)
 
 
 class LLMSummarizer:
-    """LLM-based content summarizer using OpenAI"""
+    """LLM-based content summarizer using configurable providers"""
 
-    def __init__(self, api_key: Optional[str] = None,
-                 model: str = "gpt-3.5-turbo"):
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
-        self.model = model
-        self.client = None
-
-        if self.api_key:
-            try:
-                from openai import OpenAI  # type: ignore  # pylint: disable=import-outside-toplevel
-                self.client = OpenAI(api_key=self.api_key)
-            except ImportError:
-                logger.error(
-                    "OpenAI library not installed. "
-                    "Please install: pip install openai"
-                )
+    def __init__(self, provider: Optional[LLMProvider] = None, 
+                 model: Optional[str] = None, **config):
+        """
+        Initialize LLM summarizer with flexible provider selection
+        
+        Args:
+            provider: Specific LLM provider to use (optional)
+            model: Specific model to use (optional)
+            **config: Additional configuration for the provider
+        """
+        if provider:
+            self.llm_client = get_llm_client(provider, model=model, **config)
         else:
-            logger.warning(
-                "OpenAI API key not found. "
-                "LLM summarization will not work."
-            )
+            # Use best available client
+            self.llm_client = get_best_llm_client()
+        
+        self.client_available = self.llm_client is not None and self.llm_client.available
+        
+        if self.client_available and self.llm_client:
+            provider_info = self.llm_client.get_provider_info()
+            logger.info(f"LLM Summarizer initialized with {provider_info['provider']} "
+                       f"model: {provider_info['model']}")
+        else:
+            logger.warning("No LLM client available. Will use fallback summarization.")
 
     def summarize_results(
             self, results: List[SearchResult], query: str) -> str:
         """
-        Summarize search results using LLM
+        Summarize search results using available LLM
 
         Args:
             results: List of search results
@@ -46,7 +50,7 @@ class LLMSummarizer:
         Returns:
             str: Generated summary
         """
-        if not self.client:
+        if not self.client_available:
             return self._fallback_summary(results, query)
 
         try:
@@ -66,27 +70,26 @@ class LLMSummarizer:
                 f'(around 200-300 words).'
             )
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are an expert "
-                     "content summarizer and research analyst."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=400,
-                temperature=0.3
-            )
+            system_prompt = "You are an expert content summarizer and research analyst."
+            
+            if self.llm_client:
+                response_content = self.llm_client.generate(prompt, system_prompt)
+            else:
+                response_content = ""
+            
+            if response_content:
+                return response_content
+            else:
+                return self._fallback_summary(results, query)
 
-            return response.choices[0].message.content.strip()
-
-        except (ImportError, AttributeError, KeyError) as e:
+        except Exception as e:
             logger.error("LLM summarization error: %s", e)
             return self._fallback_summary(results, query)
 
     def extract_key_insights(self, results: List[SearchResult],
                              query: str) -> List[str]:
         """
-        Extract key insights from search results
+        Extract key insights from search results using available LLM
 
         Args:
             results: List of search results
@@ -95,7 +98,7 @@ class LLMSummarizer:
         Returns:
             List[str]: Key insights
         """
-        if not self.client:
+        if not self.client_available:
             return self._fallback_insights(results)
 
         try:
@@ -106,34 +109,32 @@ class LLMSummarizer:
                 f'extract 3-5 key insights as a numbered list:\n\n{content}'
             )
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system",
-                     "content": (
-                         "You are a research analyst extracting "
-                         "key insights from web search results.")},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=300,
-                temperature=0.3
+            system_prompt = (
+                "You are a research analyst extracting "
+                "key insights from web search results."
             )
+            
+            if self.llm_client:
+                response_content = self.llm_client.generate(prompt, system_prompt)
+            else:
+                response_content = ""
 
-            # Parse numbered list
-            insights_text = response.choices[0].message.content.strip()
-            insights = []
+            if response_content:
+                # Parse numbered list
+                insights = []
+                for line in response_content.split('\n'):
+                    line = line.strip()
+                    if line and (line[0].isdigit() or line.startswith('-')):
+                        # Remove numbering/bullets
+                        insight = line.split('.', 1)[-1].strip()
+                        if insight:
+                            insights.append(insight)
 
-            for line in insights_text.split('\n'):
-                line = line.strip()
-                if line and (line[0].isdigit() or line.startswith('-')):
-                    # Remove numbering/bullets
-                    insight = line.split('.', 1)[-1].strip()
-                    if insight:
-                        insights.append(insight)
+                return insights[:5]  # Limit to 5 insights
+            else:
+                return self._fallback_insights(results)
 
-            return insights[:5]  # Limit to 5 insights
-
-        except (ImportError, AttributeError, KeyError) as e:
+        except Exception as e:
             logger.error("Insight extraction error: %s", e)
             return self._fallback_insights(results)
 

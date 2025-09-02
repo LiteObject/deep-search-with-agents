@@ -18,11 +18,11 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 - **Multi-Agent Architecture**: Specialized agents for research, news, and general searches
 - **Three Implementation Approaches**: Choose from custom, LangChain, or official patterns
 - **Multiple Search Engines**: DuckDuckGo, Tavily, Wikipedia integration
-- **AI-Powered Intelligence**: LLM-based summarization and insight extraction
+- **Flexible LLM Integration**: Modular LLM factory supporting Ollama, OpenAI, and Anthropic
 - **Interactive Interfaces**: Both Streamlit web app and CLI available
-- **Privacy-Focused**: Works without external APIs using DuckDuckGo by default
+- **Privacy-Focused**: Works locally without external APIs, all processing on your machine
 - **High Performance**: Concurrent searches with intelligent result ranking
-- **Extensible Architecture**: Easy to add new agents and search sources
+- **Extensible Architecture**: Easy to add new agents, search sources, and LLM providers
 
 ## Project Structure
 
@@ -110,7 +110,7 @@ pip install -r requirements.txt
 
 # Optional: Set up environment variables for enhanced features
 cp .env.example .env
-# Edit .env with your API keys (OPENAI_API_KEY, TAVILY_API_KEY)
+# Edit .env with your configuration (OLLAMA_BASE_URL, OLLAMA_MODEL, TAVILY_API_KEY)
 ```
 
 ### Running the Application
@@ -360,17 +360,41 @@ class SearchSummary:
 ### Environment Variables (Optional)
 ```bash
 # .env file (copy from .env.example)
-OPENAI_API_KEY=your_openai_api_key_here     # For AI summarization
+OLLAMA_BASE_URL=http://localhost:11434      # Ollama server URL
+OLLAMA_MODEL=gpt-oss:latest                 # Ollama model for AI summarization
 TAVILY_API_KEY=your_tavily_api_key_here     # For enhanced search results
 LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR)
 ```
 
 ### Configuration Features
-- **Graceful Fallbacks**: System works without API keys using free alternatives
+- **Graceful Fallbacks**: System works without Ollama using simple text-based summarization
 - **Multiple Search Engines**: Configurable search engine selection and priority
+- **Flexible LLM Integration**: Modular LLM factory for easy provider switching
+- **Local AI Processing**: Uses Ollama for private, local AI summarization instead of cloud APIs
 - **Customizable Agents**: Easy to modify agent behavior and specializations
 - **Logging**: Comprehensive logging with configurable levels
 - **Settings Validation**: Automatic configuration validation on startup
+
+### LLM Provider Support
+
+The system now includes a flexible LLM factory that supports multiple providers:
+
+- **🏠 Ollama** (Default): Local, private, offline AI processing
+- **🌐 OpenAI**: Cloud-based GPT models (API key required)
+- **🧠 Anthropic**: Claude models (API key required)
+
+**Easy Provider Switching:**
+```python
+from tools.llm_factory import LLMProvider
+from tools.summarizer import LLMSummarizer
+
+# Auto-select best available provider
+summarizer = LLMSummarizer()
+
+# Or specify a provider
+summarizer = LLMSummarizer(provider=LLMProvider.OLLAMA)
+summarizer = LLMSummarizer(provider=LLMProvider.OPENAI, model="gpt-4")
+```
 
 ## Implementation Choices & Deep Agents Explained
 

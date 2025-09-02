@@ -63,9 +63,16 @@ class BaseAgent(ABC):
                 self.search_manager = WebSearchManager()
 
             if self.summarizer is None:
-                # Try to use LLM summarizer, fallback to simple
+                # Try to use LLM summarizer with factory, fallback to simple
                 try:
-                    self.summarizer = LLMSummarizer()
+                    from config.settings import Settings  # pylint: disable=import-outside-toplevel
+                    from tools.llm_factory import LLMProvider  # pylint: disable=import-outside-toplevel
+                    
+                    self.summarizer = LLMSummarizer(
+                        provider=LLMProvider.OLLAMA,
+                        model=Settings.OLLAMA_MODEL,
+                        base_url=Settings.OLLAMA_BASE_URL
+                    )
                 except (ImportError, AttributeError):
                     self.summarizer = SimpleSummarizer()
         except ImportError as e:

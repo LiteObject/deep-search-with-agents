@@ -14,8 +14,11 @@ class Settings:
     """Application settings"""
 
     # API Keys
-    OPENAI_API_KEY: str = os.getenv('OPENAI_API_KEY', '')
     TAVILY_API_KEY: str = os.getenv('TAVILY_API_KEY', '')
+
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+    OLLAMA_MODEL: str = os.getenv('OLLAMA_MODEL', 'gpt-oss:latest')
 
     # Search Engine Settings
     DEFAULT_SEARCH_ENGINE: str = os.getenv(
@@ -51,7 +54,8 @@ class Settings:
         return {
             'max_iterations': cls.MAX_ITERATIONS,
             'verbose': cls.VERBOSE_MODE,
-            'openai_key': cls.OPENAI_API_KEY,
+            'ollama_base_url': cls.OLLAMA_BASE_URL,
+            'ollama_model': cls.OLLAMA_MODEL,
             'tavily_key': cls.TAVILY_API_KEY
         }
 
@@ -74,9 +78,15 @@ class Settings:
             return False
 
         # Check optional but recommended settings
-        if not cls.OPENAI_API_KEY:
-            print("Warning: OPENAI_API_KEY not set. "
-                  "AI summarization will not be available.")
+        try:
+            import requests
+            response = requests.get(f"{cls.OLLAMA_BASE_URL}/api/tags", timeout=5)
+            if response.status_code != 200:
+                print(f"Warning: Could not connect to Ollama at {cls.OLLAMA_BASE_URL}. "
+                      f"AI summarization will not be available.")
+        except Exception:
+            print(f"Warning: Could not connect to Ollama at {cls.OLLAMA_BASE_URL}. "
+                  f"AI summarization will not be available.")
 
         if not cls.TAVILY_API_KEY:
             print("Warning: TAVILY_API_KEY not set. "
