@@ -10,10 +10,33 @@ from typing import Any, Dict, List, Optional
 
 import logging
 
+# Conditional imports with error handling
+try:
+    from config.settings import Settings
+except ImportError:
+    Settings = None
+
+try:
+    from tools.llm_factory import LLMProvider
+except ImportError:
+    LLMProvider = None
+
+try:
+    from tools.summarizer import LLMSummarizer, SimpleSummarizer
+except ImportError:
+    LLMSummarizer = None
+    SimpleSummarizer = None
+
+try:
+    from tools.web_search import WebSearchManager
+except ImportError:
+    WebSearchManager = None
+
 
 @dataclass
 class SearchResult:
     """Data class for search results"""
+
     title: str
     url: str
     content: str
@@ -25,6 +48,7 @@ class SearchResult:
 @dataclass
 class SearchSummary:
     """Data class for search summary"""
+
     query: str
     summary: str
     key_points: List[str]
@@ -57,29 +81,35 @@ class BaseAgent(ABC):
     def _initialize_common_components(self):
         """Initialize common components used by all agents"""
         try:
-            from tools.web_search import WebSearchManager  # pylint: disable=import-outside-toplevel
-            from tools.summarizer import LLMSummarizer, SimpleSummarizer  # pylint: disable=import-outside-toplevel
+            if WebSearchManager is None:
+                self.logger.warning("WebSearchManager not available")
+                return
+
             if self.search_manager is None:
                 self.search_manager = WebSearchManager()
 
             if self.summarizer is None:
                 # Try to use LLM summarizer with factory, fallback to simple
                 try:
-                    from config.settings import Settings  # pylint: disable=import-outside-toplevel
-                    from tools.llm_factory import LLMProvider  # pylint: disable=import-outside-toplevel
-                    
+                    if Settings is None or LLMProvider is None or LLMSummarizer is None:
+                        raise ImportError("LLM components not available")
+
                     self.summarizer = LLMSummarizer(
                         provider=LLMProvider.OLLAMA,
                         model=Settings.OLLAMA_MODEL,
-                        base_url=Settings.OLLAMA_BASE_URL
+                        base_url=Settings.OLLAMA_BASE_URL,
                     )
                 except (ImportError, AttributeError):
-                    self.summarizer = SimpleSummarizer()
-        except ImportError as e:
+                    if SimpleSummarizer is not None:
+                        self.summarizer = SimpleSummarizer()
+                    else:
+                        self.logger.warning("No summarizer available")
+        except (ImportError, AttributeError, TypeError) as e:
             self.logger.warning("Some tools modules not available: %s", str(e))
 
-    def _create_search_summary(self, *, query: str, summary: str,
-                               results_data: Dict[str, Any]) -> SearchSummary:
+    def _create_search_summary(
+        self, *, query: str, summary: str, results_data: Dict[str, Any]
+    ) -> SearchSummary:
         """Create a SearchSummary object with common fields
 
         Args:
@@ -90,18 +120,19 @@ class BaseAgent(ABC):
         return SearchSummary(
             query=query,
             summary=summary,
-            key_points=results_data['key_points'],
-            sources=list(set(r.source for r in results_data['top_results'])),
-            total_results=len(results_data['top_results']),
-            search_time=results_data['search_time']
+            key_points=results_data["key_points"],
+            sources=list(set(r.source for r in results_data["top_results"])),
+            total_results=len(results_data["top_results"]),
+            search_time=results_data["search_time"],
         )
 
-    def _extract_insights_from_results(self, results: List[SearchResult],
-                                       keywords: List[str]) -> List[str]:
+    def _extract_insights_from_results(
+        self, results: List[SearchResult], keywords: List[str]
+    ) -> List[str]:
         """Common insight extraction logic used by multiple agents"""
         insights = []
         for result in results[:5]:
-            sentences = result.content.split('.')
+            sentences = result.content.split(".")
             for sentence in sentences:
                 sentence = sentence.strip()
                 if any(keyword in sentence.lower() for keyword in keywords):
@@ -134,8 +165,7 @@ class BaseAgent(ABC):
         Returns:
             str: Generated summary
         """
-        raise NotImplementedError(
-            "Subclasses must implement _process_results method")
+        raise NotImplementedError("Subclasses must implement _process_results method")
 
     def _filter_results(
         self, results: List[SearchResult], min_score: float = 0.5
@@ -152,8 +182,7 @@ class BaseAgent(ABC):
         """
         return [r for r in results if r.relevance_score >= min_score]
 
-    def _deduplicate_results(
-            self, results: List[SearchResult]) -> List[SearchResult]:
+    def _deduplicate_results(self, results: List[SearchResult]) -> List[SearchResult]:
         """
         Remove duplicate results based on URL.
 
@@ -173,8 +202,7 @@ class BaseAgent(ABC):
 
         return unique_results
 
-    def _extract_key_points(self, content: str,
-                            max_points: int = 5) -> List[str]:
+    def _extract_key_points(self, content: str, max_points: int = 5) -> List[str]:
         """
         Extract key points from content.
 
@@ -186,13 +214,14 @@ class BaseAgent(ABC):
             List[str]: Key points extracted
         """
         # Simple implementation - can be enhanced with NLP
-        sentences = content.split('.')
+        sentences = content.split(".")
         # Filter out short sentences and take the most informative ones
-        meaningful_sentences = [s.strip()
-                                for s in sentences if len(s.strip()) > 50]
+        meaningful_sentences = [s.strip() for s in sentences if len(s.strip()) > 50]
         return meaningful_sentences[:max_points]
 
-    def _generate_citations(self, results: List[SearchResult]) -> Dict[str, Dict[str, str]]:
+    def _generate_citations(
+        self, results: List[SearchResult]
+    ) -> Dict[str, Dict[str, str]]:
         """
         Generate citations for search results.
 
@@ -206,18 +235,27 @@ class BaseAgent(ABC):
 
         for i, result in enumerate(results, 1):
             ref_key = f"[{i}]"
+            timestamp_str = result.timestamp.strftime("%Y-%m-%d")
+            full_citation = (
+                f"{result.title}. {result.source}. {timestamp_str}. "
+                f"Available at: {result.url}"
+            )
             citations[ref_key] = {
                 "title": result.title,
                 "url": result.url,
                 "source": result.source,
-                "timestamp": result.timestamp.strftime("%Y-%m-%d"),
-                "full_citation": f"{result.title}. {result.source}. {result.timestamp.strftime('%Y-%m-%d')}. Available at: {result.url}"
+                "timestamp": timestamp_str,
+                "full_citation": full_citation,
             }
 
         return citations
 
-    def _create_cited_summary(self, summary: str, citations: Dict[str, Dict[str, str]],
-                              results: List[SearchResult]) -> str:
+    def _create_cited_summary(
+        self,
+        summary: str,
+        citations: Dict[str, Dict[str, str]],
+        results: List[SearchResult],
+    ) -> str:
         """
         Create a summary with proper citations.
 
@@ -238,18 +276,17 @@ class BaseAgent(ABC):
             ref_key = f"[{i}]"
 
             # Look for keywords from the result title in the summary
-            title_words = result.title.lower().split()[
-                :3]  # First 3 words of title
+            title_words = result.title.lower().split()[:3]  # First 3 words of title
 
             for word in title_words:
                 if len(word) > 3 and word in summary.lower():
                     # Add citation after the sentence containing this keyword
-                    sentences = cited_summary.split('.')
+                    sentences = cited_summary.split(".")
                     for j, sentence in enumerate(sentences):
                         if word in sentence.lower() and ref_key not in sentence:
                             sentences[j] = sentence + f" {ref_key}"
                             break
-                    cited_summary = '.'.join(sentences)
+                    cited_summary = ".".join(sentences)
                     break
 
         return cited_summary
@@ -265,7 +302,7 @@ class BaseAgent(ABC):
             "name": self.name,
             "description": self.description,
             "max_results": self.max_results,
-            "supported_queries": self._get_supported_query_types()
+            "supported_queries": self._get_supported_query_types(),
         }
 
     @abstractmethod
@@ -277,4 +314,5 @@ class BaseAgent(ABC):
             List[str]: Supported query types
         """
         raise NotImplementedError(
-            "Subclasses must implement _get_supported_query_types method")
+            "Subclasses must implement _get_supported_query_types method"
+        )

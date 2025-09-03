@@ -6,9 +6,11 @@ General Agent - For broad, general-purpose searches.
 import time
 from typing import List
 
+# Third-party imports  
+from config.settings import Settings  # type: ignore # pylint: disable=import-error
+
 # First-party imports
 from .base_agent import BaseAgent, SearchResult, SearchSummary
-from config.settings import Settings  # type: ignore # pylint: disable=import-error
 
 
 class GeneralAgent(BaseAgent):
@@ -48,7 +50,7 @@ class GeneralAgent(BaseAgent):
         default_engines = ['duckduckgo']
         if Settings.TAVILY_API_KEY:
             default_engines.insert(0, 'tavily')  # Prioritize Tavily for better results
-        
+
         engines = kwargs.get('engines', default_engines)
         if kwargs.get('include_wikipedia', True):
             engines.append('wikipedia')
@@ -259,8 +261,9 @@ class GeneralAgent(BaseAgent):
         # Use extended max_results for comprehensive search without modifying the instance
         comprehensive_engines = ['duckduckgo', 'wikipedia']
         if Settings.TAVILY_API_KEY:
-            comprehensive_engines = ['tavily', 'duckduckgo', 'wikipedia']  # Include all for comprehensive results
-        
+            # Include all for comprehensive results
+            comprehensive_engines = ['tavily', 'duckduckgo', 'wikipedia']
+
         result = self.search(
             query,
             engines=comprehensive_engines,

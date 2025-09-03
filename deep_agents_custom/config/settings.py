@@ -5,6 +5,8 @@ Application settings and configuration.
 import os
 from typing import Dict, Any
 from pathlib import Path
+
+import requests
 from dotenv import load_dotenv  # type: ignore
 
 # Load environment variables from root directory
@@ -83,14 +85,13 @@ class Settings:
 
         # Check optional but recommended settings
         try:
-            import requests
             response = requests.get(f"{cls.OLLAMA_BASE_URL}/api/tags", timeout=5)
             if response.status_code != 200:
                 print(f"Warning: Could not connect to Ollama at {cls.OLLAMA_BASE_URL}. "
                       f"AI summarization will not be available.")
-        except Exception:
+        except (requests.exceptions.RequestException, OSError, ValueError) as e:
             print(f"Warning: Could not connect to Ollama at {cls.OLLAMA_BASE_URL}. "
-                  f"AI summarization will not be available.")
+                  f"AI summarization will not be available. Error: {e}")
 
         if not cls.TAVILY_API_KEY:
             print("Warning: TAVILY_API_KEY not set. "

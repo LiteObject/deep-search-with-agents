@@ -2,7 +2,6 @@
 Streamlit web interface for the Deep Search Agents application.
 """
 
-import time
 from typing import Any, Dict, List
 
 import pandas as pd  # type: ignore
@@ -27,8 +26,6 @@ setup_logging(settings.LOG_LEVEL, log_to_file=False)
 logger = get_logger(__name__)
 
 # Initialize session state
-if 'search_history' not in st.session_state:
-    st.session_state.search_history = []
 if 'orchestrator' not in st.session_state:
     st.session_state.orchestrator = SearchOrchestrator()
 
@@ -54,10 +51,6 @@ def main():
 
     # Main content
     create_main_interface()
-
-    # Search history
-    if st.session_state.search_history:
-        create_search_history()
 
 
 def create_sidebar():
@@ -174,8 +167,6 @@ def perform_search(query: str):
     search_mode = st.session_state.search_mode
 
     with st.spinner(f"🔍 Researching {query} using {search_mode.lower()}..."):
-        start_time = time.time()
-
         try:
             if search_mode == "Auto-Select Agent":
                 result = st.session_state.orchestrator.search(
@@ -210,15 +201,6 @@ def perform_search(query: str):
                 results = st.session_state.orchestrator.comprehensive_search(
                     query)
                 display_comprehensive_results(results)
-
-            # Add to search history
-            search_time = time.time() - start_time
-            st.session_state.search_history.append({
-                'query': query,
-                'mode': search_mode,
-                'time': search_time,
-                'timestamp': time.strftime("%Y-%m-%d %H:%M:%S")
-            })
 
         except (ValueError, ConnectionError) as e:
             st.error(f"Search failed: {str(e)}")
@@ -411,44 +393,6 @@ def _display_agent_tabs(agent_results: Dict[str, Any]):
     for tab, (agent_name, result) in zip(tabs, agent_results.items()):
         with tab:
             display_single_result(result, f"{agent_name.title()} Agent")
-
-
-def create_search_history():
-    """Create search history section"""
-
-    st.header("📊 Search History")
-
-    # History metrics
-    total_searches = len(st.session_state.search_history)
-    avg_time = sum(h['time']
-                   for h in st.session_state.search_history) / total_searches
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Searches", total_searches)
-    with col2:
-        st.metric("Average Time", format_search_time(avg_time))
-    with col3:
-        if st.button("Clear History"):
-            st.session_state.search_history = []
-            st.rerun()
-
-    # History table
-    if st.session_state.search_history:
-        history_df = pd.DataFrame(st.session_state.search_history)
-        history_df['Search Time'] = history_df['time'].apply(
-            format_search_time)
-
-        st.dataframe(
-            history_df[['timestamp', 'query', 'mode', 'Search Time']],
-            column_config={
-                'timestamp': 'Timestamp',
-                'query': 'Query',
-                'mode': 'Search Mode',
-                'Search Time': 'Duration'
-            },
-            use_container_width=True
-        )
 
 
 if __name__ == "__main__":

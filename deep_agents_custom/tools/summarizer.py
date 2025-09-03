@@ -4,7 +4,7 @@ AI-powered content summarization tools.
 
 import logging
 from typing import List, Optional
-from agents.base_agent import SearchResult
+from agents.base_agent import SearchResult  # type: ignore # pylint: disable=import-error
 from .llm_factory import get_best_llm_client, LLMProvider, get_llm_client
 
 logger = logging.getLogger(__name__)
@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class LLMSummarizer:
     """LLM-based content summarizer using configurable providers"""
 
-    def __init__(self, provider: Optional[LLMProvider] = None, 
+    def __init__(self, provider: Optional[LLMProvider] = None,
                  model: Optional[str] = None, **config):
         """
         Initialize LLM summarizer with flexible provider selection
-        
+
         Args:
             provider: Specific LLM provider to use (optional)
             model: Specific model to use (optional)
@@ -28,13 +28,13 @@ class LLMSummarizer:
         else:
             # Use best available client
             self.llm_client = get_best_llm_client()
-        
+
         self.client_available = self.llm_client is not None and self.llm_client.available
-        
+
         if self.client_available and self.llm_client:
             provider_info = self.llm_client.get_provider_info()
-            logger.info(f"LLM Summarizer initialized with {provider_info['provider']} "
-                       f"model: {provider_info['model']}")
+            logger.info("LLM Summarizer initialized with %s model: %s",
+                       provider_info['provider'], provider_info['model'])
         else:
             logger.warning("No LLM client available. Will use fallback summarization.")
 
@@ -71,18 +71,18 @@ class LLMSummarizer:
             )
 
             system_prompt = "You are an expert content summarizer and research analyst."
-            
+
             if self.llm_client:
                 response_content = self.llm_client.generate(prompt, system_prompt)
             else:
                 response_content = ""
-            
+
             if response_content:
                 return response_content
             else:
                 return self._fallback_summary(results, query)
 
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError) as e:  # pylint: disable=broad-exception-caught
             logger.error("LLM summarization error: %s", e)
             return self._fallback_summary(results, query)
 
@@ -113,7 +113,7 @@ class LLMSummarizer:
                 "You are a research analyst extracting "
                 "key insights from web search results."
             )
-            
+
             if self.llm_client:
                 response_content = self.llm_client.generate(prompt, system_prompt)
             else:
@@ -134,7 +134,7 @@ class LLMSummarizer:
             else:
                 return self._fallback_insights(results)
 
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError) as e:  # pylint: disable=broad-exception-caught
             logger.error("Insight extraction error: %s", e)
             return self._fallback_insights(results)
 

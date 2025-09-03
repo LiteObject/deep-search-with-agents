@@ -10,6 +10,12 @@ from typing import List
 # First-party imports
 from .base_agent import BaseAgent, SearchResult, SearchSummary
 
+# Local imports with error handling
+try:
+    from config.settings import Settings
+except ImportError:
+    Settings = None
+
 
 class NewsAgent(BaseAgent):
     """
@@ -62,10 +68,9 @@ class NewsAgent(BaseAgent):
             # Search for news with recent content preference
             # Use Tavily for better news results if available
             engines = ['duckduckgo']
-            from config.settings import Settings  # pylint: disable=import-outside-toplevel
-            if Settings.TAVILY_API_KEY:
+            if Settings and hasattr(Settings, 'TAVILY_API_KEY') and Settings.TAVILY_API_KEY:
                 engines = ['tavily', 'duckduckgo']
-            
+
             results = self.search_manager.multi_search(
                 enhanced_query,
                 engines=engines,

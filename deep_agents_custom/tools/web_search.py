@@ -38,12 +38,12 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
             List[SearchResult]: Search results
         """
         try:
-            # Use ddgs library for better results
+            # Try to use ddgs library for better results
             from ddgs import DDGS  # type: ignore  # pylint: disable=import-outside-toplevel
 
             results = []
             try:
-                # Updated initialization for newer versions of duckduckgo-search
+                # Updated initialization for newer versions of ddgs
                 ddgs = DDGS()
                 search_results = ddgs.text(query, max_results=max_results)
 
@@ -62,54 +62,34 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
                     results.append(search_result)
             except Exception as ddgs_error:  # pylint: disable=broad-exception-caught
                 logger.error(
-                    "DuckDuckGo DDGS initialization error: %s", str(ddgs_error))
-                # Fallback to basic search if DDGS fails
-                logger.info("Falling back to basic DuckDuckGo search")
-                return self._fallback_search(query, max_results)
+                    "DuckDuckGo DDGS search error: %s", str(ddgs_error))
+                # Return empty results instead of fallback
+                logger.info("DuckDuckGo search failed, returning empty results")
+                return []
 
             return results
 
-        except ImportError:
-            logger.error("DuckDuckGo search library not available")
-            return self._fallback_search(query, max_results)
+        except ImportError as import_error:
+            logger.warning("DuckDuckGo ddgs library not available: %s", str(import_error))
+            logger.info("DuckDuckGo search disabled, other engines will be used")
+            return []
         except (ConnectionError, TimeoutError) as e:
-            logger.error("DuckDuckGo search error: %s", str(e))
+            logger.error("DuckDuckGo search connection error: %s", str(e))
             return []
 
     def _fallback_search(self, query: str, max_results: int = 10) -> List[SearchResult]:
         """
-        Fallback search method using basic HTTP requests
+        Fallback search method - returns empty results instead of demo data
 
         Args:
             query: Search query
             max_results: Maximum number of results
 
         Returns:
-            List[SearchResult]: Search results
+            List[SearchResult]: Empty search results
         """
-        try:
-            # Basic fallback search - returns demo results
-            logger.info("Using fallback search for DuckDuckGo")
-            results = []
-
-            # Create some demo results to show the interface works
-            for i in range(min(3, max_results)):
-                search_result = SearchResult(
-                    title=f"Demo Result {i+1} for '{query}'",
-                    url=f"https://example.com/result{i+1}",
-                    content=f"This is a demo search result for the query '{query}'. "
-                            f"The actual search engines may be experiencing connectivity issues.",
-                    source='duckduckgo-fallback',
-                    timestamp=datetime.now(),
-                    relevance_score=1.0 - (i * 0.1)
-                )
-                results.append(search_result)
-
-            return results
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Fallback search also failed: %s", str(e))
-            return []
+        logger.info("DuckDuckGo search failed, returning empty results")
+        return []
 
 
 class TavilySearch:  # pylint: disable=too-few-public-methods
