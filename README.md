@@ -23,6 +23,7 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 - **Privacy-Focused**: Works locally without external APIs, all processing on your machine
 - **High Performance**: Concurrent searches with intelligent result ranking
 - **Extensible Architecture**: Easy to add new agents, search sources, and LLM providers
+- **Colored Logging**: Enhanced console output with color-coded log levels (warnings in yellow, errors in red)
 
 > **For detailed LLM architecture information, see [LLM_ARCHITECTURE_GUIDE.md](LLM_ARCHITECTURE_GUIDE.md)**
 
