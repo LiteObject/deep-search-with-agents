@@ -546,6 +546,140 @@ black agents/ tools/ config/ utils/ *.py
 - **Documentation**: Detailed docstrings for all public methods
 - **Error Handling**: Graceful degradation and comprehensive logging
 
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### **ImportError: attempted relative import beyond top-level package**
+If you get this error when running CLI commands:
+
+**Solution**: Set PYTHONPATH when running CLI:
+```bash
+# Windows PowerShell
+cd deep_agents_custom
+$env:PYTHONPATH="."; python main.py search "your query"
+
+# Windows Command Prompt
+cd deep_agents_custom
+set PYTHONPATH=. && python main.py search "your query"
+
+# Linux/Mac
+cd deep_agents_custom
+PYTHONPATH=. python main.py search "your query"
+```
+
+#### **"ddgs library not available" or "WebSearchManager not available"**
+This indicates missing search dependencies.
+
+**Solution**: Install missing packages:
+```bash
+pip install ddgs tavily-python anthropic
+# Or reinstall all requirements
+pip install -r requirements.txt
+```
+
+#### **"Could not connect to Ollama" Warning**
+This is expected if you don't have Ollama running locally.
+
+**Options**:
+1. **Install and run Ollama** (recommended for full AI features):
+   ```bash
+   # Download from https://ollama.ai
+   ollama serve
+   ollama pull gpt-oss:latest
+   ```
+
+2. **Use OpenAI/Anthropic instead**:
+   ```bash
+   # Set API keys in .env file
+   OPENAI_API_KEY=your_key_here
+   # OR
+   ANTHROPIC_API_KEY=your_key_here
+   ```
+
+3. **Continue without AI summarization** (basic search still works)
+
+#### **"No results found" or Empty Search Results**
+**Potential causes**:
+- Network connectivity issues
+- Search engine rate limiting
+- Missing API keys for enhanced search
+
+**Solutions**:
+1. **Check internet connection**
+2. **Wait a moment and retry** (rate limiting)
+3. **Try different search engines**:
+   ```bash
+   python main.py search "query" --engines duckduckgo wikipedia
+   ```
+4. **Add Tavily API key** for enhanced results:
+   ```bash
+   # In .env file
+   TAVILY_API_KEY=your_tavily_key_here
+   ```
+
+#### **Streamlit App Not Loading**
+**Solution**:
+```bash
+cd deep_agents_custom
+streamlit run app.py --server.port 8501 --server.address localhost
+```
+
+#### **Virtual Environment Issues**
+**Solution**: Recreate virtual environment:
+```bash
+# Remove existing environment
+rmdir .venv /s  # Windows
+rm -rf .venv    # Linux/Mac
+
+# Create new environment
+python -m venv .venv
+# Activate
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Performance Tips
+
+1. **Use specific agents** for better performance:
+   ```bash
+   python main.py search "academic topic" --agent research
+   python main.py search "current news" --agent news
+   ```
+
+2. **Limit results** for faster searches:
+   ```bash
+   python main.py search "query" --max-results 5
+   ```
+
+3. **Use local Ollama** for private AI processing:
+   ```bash
+   # Better than cloud APIs for privacy and speed
+   ollama serve
+   ```
+
+4. **Configure engines** for optimal results:
+   ```bash
+   # In .env file
+   TAVILY_API_KEY=your_key  # For enhanced search
+   OLLAMA_MODEL=gpt-oss:latest  # For local AI
+   ```
+
+### Debug Mode
+
+Enable detailed logging for troubleshooting:
+```bash
+# In .env file
+LOG_LEVEL=DEBUG
+
+# Or set environment variable
+export LOG_LEVEL=DEBUG  # Linux/Mac
+$env:LOG_LEVEL="DEBUG"  # Windows PowerShell
+```
+
 ## Privacy & Security
 
 - **Privacy-First**: Uses DuckDuckGo by default (no user tracking)

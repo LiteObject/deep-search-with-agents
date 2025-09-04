@@ -11,20 +11,23 @@ from .helpers import (
     extract_keywords,
     format_search_time,
     validate_url,
-    create_search_summary_dict
+    create_search_summary_dict,
 )
 from .logger import setup_logging, get_logger
+from .types import SearchResult, SearchSummary
 
 __all__ = [
-    'clean_text',
-    'extract_domain',
-    'truncate_text',
-    'calculate_text_similarity',
-    'generate_content_hash',
-    'extract_keywords',
-    'format_search_time',
-    'validate_url',
-    'create_search_summary_dict',
-    'setup_logging',
-    'get_logger'
+    "clean_text",
+    "extract_domain",
+    "truncate_text",
+    "calculate_text_similarity",
+    "generate_content_hash",
+    "extract_keywords",
+    "format_search_time",
+    "validate_url",
+    "create_search_summary_dict",
+    "setup_logging",
+    "get_logger",
+    "SearchResult",
+    "SearchSummary",
 ]

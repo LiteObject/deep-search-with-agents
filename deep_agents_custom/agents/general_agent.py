@@ -6,7 +6,7 @@ General Agent - For broad, general-purpose searches.
 import time
 from typing import List
 
-# Third-party imports  
+# Third-party imports
 from config.settings import Settings  # type: ignore # pylint: disable=import-error
 
 # First-party imports
@@ -23,7 +23,7 @@ class GeneralAgent(BaseAgent):
         super().__init__(
             "GeneralAgent",
             "General-purpose agent for comprehensive web searches.",
-            max_results
+            max_results,
         )
 
         # Initialize components using the parent class method
@@ -47,16 +47,16 @@ class GeneralAgent(BaseAgent):
         start_time = time.time()
 
         # Default engines with Tavily if available
-        default_engines = ['duckduckgo']
+        default_engines = ["duckduckgo"]
         if Settings.TAVILY_API_KEY:
-            default_engines.insert(0, 'tavily')  # Prioritize Tavily for better results
+            default_engines.insert(0, "tavily")  # Prioritize Tavily for better results
 
-        engines = kwargs.get('engines', default_engines)
-        if kwargs.get('include_wikipedia', True):
-            engines.append('wikipedia')
+        engines = kwargs.get("engines", default_engines)
+        if kwargs.get("include_wikipedia", True):
+            engines.append("wikipedia")
 
         # Use override if provided, otherwise use instance max_results
-        max_results = kwargs.get('max_results_override', self.max_results)
+        max_results = kwargs.get("max_results_override", self.max_results)
 
         # Ensure search_manager is initialized
         if self.search_manager is None:
@@ -65,7 +65,20 @@ class GeneralAgent(BaseAgent):
         # If still None after initialization, handle gracefully
         if self.search_manager is None:
             # Fallback to simple single-engine search
-            from ..tools.web_search import DuckDuckGoSearch  # pylint: disable=import-outside-toplevel
+            try:
+                from ..tools.web_search import (
+                    DuckDuckGoSearch,
+                )  # pylint: disable=import-outside-toplevel
+            except ImportError:
+                # Handle case when running as main script
+                import sys
+                import os
+
+                sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+                from tools.web_search import (
+                    DuckDuckGoSearch,
+                )  # pylint: disable=import-outside-toplevel
+
             ddg_search = DuckDuckGoSearch()
             results = ddg_search.search(query, max_results)
         else:
@@ -73,14 +86,14 @@ class GeneralAgent(BaseAgent):
             results = self.search_manager.multi_search(
                 query,
                 engines=engines,
-                max_results_per_engine=max_results // len(engines)
+                max_results_per_engine=max_results // len(engines),
             )
 
         # Process and filter results
         processed_results = self._filter_general_results(results)
 
         # Limit results
-        top_results = processed_results[:self.max_results]
+        top_results = processed_results[: self.max_results]
 
         # Generate summary
         if self.summarizer:
@@ -94,8 +107,7 @@ class GeneralAgent(BaseAgent):
 
         # Generate citations and cited summary
         citations = self._generate_citations(top_results)
-        cited_summary = self._create_cited_summary(
-            summary, citations, top_results)
+        cited_summary = self._create_cited_summary(summary, citations, top_results)
 
         return SearchSummary(
             query=query,
@@ -105,8 +117,8 @@ class GeneralAgent(BaseAgent):
             total_results=len(top_results),
             search_time=search_time,
             results=top_results,  # Include full results for better display
-            citations=citations,   # Add citations
-            cited_summary=cited_summary  # Add cited summary
+            citations=citations,  # Add citations
+            cited_summary=cited_summary,  # Add cited summary
         )
 
     def _filter_general_results(
@@ -134,7 +146,7 @@ class GeneralAgent(BaseAgent):
 
             # Prefer educational and informational sources
             domain = result.url.lower()
-            edu_domains = ['.edu', '.org', 'wikipedia']
+            edu_domains = [".edu", ".org", "wikipedia"]
             if any(edu_domain in domain for edu_domain in edu_domains):
                 score += 2
 
@@ -144,8 +156,7 @@ class GeneralAgent(BaseAgent):
         scored_results.sort(key=lambda x: x[0], reverse=True)
         return [result for score, result in scored_results]
 
-    def _extract_general_insights(
-            self, results: List[SearchResult]) -> List[str]:
+    def _extract_general_insights(self, results: List[SearchResult]) -> List[str]:
         """
         Extract general insights from search results
 
@@ -160,8 +171,7 @@ class GeneralAgent(BaseAgent):
 
         for result in results[:6]:
             # Split content into sentences
-            sentences = [s.strip()
-                         for s in result.content.split('.') if s.strip()]
+            sentences = [s.strip() for s in result.content.split(".") if s.strip()]
 
             # Find informative sentences
             for sentence in sentences:
@@ -195,8 +205,7 @@ class GeneralAgent(BaseAgent):
             sources[result.source].append(result)
 
         for source, source_results in sources.items():
-            summary_lines.append(
-                f"\nFrom {source} ({len(source_results)} results):")
+            summary_lines.append(f"\nFrom {source} ({len(source_results)} results):")
             for result in source_results[:3]:  # Show top 3 per source
                 summary_lines.append(f"  • {result.title}")
                 summary_lines.append(f"    {result.content[:100]}...")
@@ -206,8 +215,12 @@ class GeneralAgent(BaseAgent):
     def _get_supported_query_types(self) -> List[str]:
         """Get supported query types for this agent"""
         return [
-            "general", "information", "definition",
-            "explanation", "how_to", "what_is"
+            "general",
+            "information",
+            "definition",
+            "explanation",
+            "how_to",
+            "what_is",
         ]
 
     def get_supported_categories(self) -> List[str]:
@@ -226,7 +239,7 @@ class GeneralAgent(BaseAgent):
             "history",
             "science",
             "technology",
-            "education"
+            "education",
         ]
 
     def quick_search(self, query: str) -> SearchSummary:
@@ -240,12 +253,11 @@ class GeneralAgent(BaseAgent):
             SearchSummary: Quick search results
         """
         # Use a limited max_results for quick search without modifying the instance
-        quick_engines = ['duckduckgo']
+        quick_engines = ["duckduckgo"]
         if Settings.TAVILY_API_KEY:
-            quick_engines = ['tavily']  # Use Tavily for faster, better quick results
-        
-        result = self.search(
-            query, engines=quick_engines, max_results_override=5)
+            quick_engines = ["tavily"]  # Use Tavily for faster, better quick results
+
+        result = self.search(query, engines=quick_engines, max_results_override=5)
         return result
 
     def comprehensive_search(self, query: str) -> SearchSummary:
@@ -259,15 +271,15 @@ class GeneralAgent(BaseAgent):
             SearchSummary: Comprehensive search results
         """
         # Use extended max_results for comprehensive search without modifying the instance
-        comprehensive_engines = ['duckduckgo', 'wikipedia']
+        comprehensive_engines = ["duckduckgo", "wikipedia"]
         if Settings.TAVILY_API_KEY:
             # Include all for comprehensive results
-            comprehensive_engines = ['tavily', 'duckduckgo', 'wikipedia']
+            comprehensive_engines = ["tavily", "duckduckgo", "wikipedia"]
 
         result = self.search(
             query,
             engines=comprehensive_engines,
             include_wikipedia=True,
-            max_results_override=25
+            max_results_override=25,
         )
         return result
