@@ -24,7 +24,7 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 - **High Performance**: Concurrent searches with intelligent result ranking
 - **Extensible Architecture**: Easy to add new agents, search sources, and LLM providers
 
-> **📖 For detailed LLM architecture information, see [LLM_ARCHITECTURE_GUIDE.md](LLM_ARCHITECTURE_GUIDE.md)**
+> **For detailed LLM architecture information, see [LLM_ARCHITECTURE_GUIDE.md](LLM_ARCHITECTURE_GUIDE.md)**
 
 ## Project Structure
 
@@ -100,7 +100,7 @@ deep-search-with-agents/
 
 ## Quick Start
 
-> **🚀 Primary Entry Point:** `cd deep_agents_custom && streamlit run app.py`  
+> **Primary Entry Point:** `cd deep_agents_custom && streamlit run app.py`  
 > The main production-ready implementation is in the `deep_agents_custom/` directory.
 
 ### Installation
@@ -187,7 +187,7 @@ python basic_test.py
 
 ## Usage Examples
 
-> **💡 Important:** All Python code examples below assume you're either:
+> **Important:** All Python code examples below assume you're either:
 > 1. **Running from within the `deep_agents_custom` directory** (recommended for CLI/scripts)
 > 2. **Using the path manipulation shown** (for standalone scripts)
 > 3. **Installing as a package** (for advanced users)
@@ -394,9 +394,9 @@ LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNIN
 
 The system includes an enhanced LLM adapter system that supports multiple providers:
 
-- **🏠 Ollama** (Default): Local, private, offline AI processing
-- **🌐 OpenAI**: Cloud-based GPT models (API key required)  
-- **🧠 Anthropic**: Claude models (API key required)
+- **Ollama** (Default): Local, private, offline AI processing
+- **OpenAI**: Cloud-based GPT models (API key required)  
+- **Anthropic**: Cloud-based Claude models (API key required)
 
 **Easy Provider Switching:**
 ```python
@@ -562,24 +562,6 @@ black agents/ tools/ config/ utils/ *.py
 - **Graceful Fallbacks**: Continues working when external services are unavailable
 - **Analytics**: Performance metrics and source overlap analysis
 - **Optimized Parsing**: Efficient content extraction and processing
-
-## Contributing
-
-We welcome contributions! Here's how to get started:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Add tests** for new functionality
-4. **Ensure code quality**: Run pylint and maintain 10.00/10 scores
-5. **Update documentation** as needed
-6. **Submit a pull request**
-
-### Contribution Guidelines
-- Follow existing code style and patterns
-- Add comprehensive docstrings and type hints
-- Include error handling and logging
-- Write tests for new functionality
-- Update README if adding new features
 
 ## License
 
