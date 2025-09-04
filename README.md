@@ -35,9 +35,6 @@ deep-search-with-agents/
 ├── .pylintrc                        # Pylint configuration
 ├── README.md                        # This documentation
 ├── requirements.txt                 # Python dependencies
-├── app.py                           # (Empty - legacy file)
-├── main.py                          # (Empty - legacy file)
-├── basic_test.py                    # (Empty - legacy file)
 ├── logs/                            # Log files directory (auto-created)
 ├── deep_agents_custom/              # ⭐ Custom implementation (production-ready)
 │   ├── __init__.py                  # Package initialization
@@ -100,8 +97,6 @@ deep-search-with-agents/
     ├── demo.py                      # Official demo
     └── example_usage.py             # Usage examples
 ```
-
-> **📝 Note:** The root-level `app.py`, `main.py`, and `basic_test.py` are empty legacy files. The functional implementations are located in their respective subdirectories (`deep_agents_custom/`, `deep_agents_with_langchain/`, `deep_agents_official/`).
 
 ## Quick Start
 
