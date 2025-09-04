@@ -41,6 +41,9 @@ disable=
     C0115,  # missing-class-docstring
     C0116,  # missing-function-docstring
     
+    # Line length issues (annoying :)
+    C0301,  # line-too-long
+    
     # Framework-specific issues (LangChain, FastAPI, etc.)
     W0221,  # arguments-differ (LangChain tool overrides with *args, **kwargs)
     

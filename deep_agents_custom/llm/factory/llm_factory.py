@@ -1,6 +1,31 @@
 """
-Enhanced LLM Factory Implementation
-Factory pattern for creating appropriate LLM adapters.
+LLM Factory Implementation
+
+This module implements the Factory pattern for creating and managing LLM (Large Language Model) adapters.
+It provides a unified interface for working with different LLM providers while abstracting away the
+complexity of provider-specific initialization and configuration.
+
+Purpose:
+- Centralized creation and management of LLM adapters for multiple providers (Ollama, OpenAI, Anthropic)
+- Auto-detection of available providers based on environment configuration
+- Caching mechanism to reuse adapter instances for improved performance
+- Fallback strategies when preferred providers are unavailable
+- Environment-based configuration management for API keys and endpoints
+
+How it works:
+1. The LLMFactory class maintains a registry of available providers and their corresponding adapter classes
+2. When creating an adapter, it auto-detects the best available provider or uses the specified one
+3. Configuration is automatically retrieved from environment variables (API keys, endpoints)
+4. Adapters are cached to avoid repeated initialization overhead
+5. If a provider fails, it automatically falls back to Ollama as the local default
+6. All adapters implement the LLMInterface contract, ensuring consistent behavior across providers
+
+Key Components:
+- LLMProvider enum: Defines available providers (OLLAMA, OPENAI, ANTHROPIC, AUTO)
+- LLMFactory class: Main factory implementation with adapter creation and management
+- Provider registry: Maps providers to their adapter classes and default models
+- Configuration management: Handles environment-based setup for each provider
+- Caching system: Stores created adapters for reuse based on provider, model, and config
 """
 
 import logging
