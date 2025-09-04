@@ -35,7 +35,7 @@ class LLMFactory:
     """Enhanced factory for creating LLM adapters"""
 
     # Registry of providers and their adapters
-    _providers: Dict[LLMProvider, Type[LLMInterface]] = {
+    _providers: Dict[LLMProvider, Type[Any]] = {
         LLMProvider.OLLAMA: OllamaAdapter,
         LLMProvider.OPENAI: OpenAIAdapter,
         LLMProvider.ANTHROPIC: AnthropicAdapter,
@@ -245,7 +245,7 @@ class LLMFactory:
     def register_provider(
         cls,
         provider: LLMProvider,
-        adapter_class: Type[LLMInterface],
+        adapter_class: Type[Any],
         default_model: str,
     ):
         """
