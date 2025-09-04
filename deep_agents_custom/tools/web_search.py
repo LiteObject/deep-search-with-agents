@@ -19,18 +19,16 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
     """
     DuckDuckGo search implementation
 
-    Note: The duckduckgo-search package has known compatibility issues with httpx versions.
-    The package tries to pass a 'proxies' parameter to httpx.Client() but many httpx versions
-    don't support this parameter, causing TypeError: Client.__init__() got an unexpected
-    keyword argument 'proxies'.
+    Fixed: The duckduckgo-search package compatibility issues have been resolved by using
+    the 'ddgs' package instead of 'duckduckgo-search'.
 
-    This implementation includes fallback mechanisms to handle this issue gracefully.
+    Installation:
+    pip uninstall duckduckgo_search
+    pip install ddgs
 
-    Potential solutions:
-    1. Update httpx to latest version (may break other dependencies)
-    2. Use specific duckduckgo-search version that's compatible
-    3. Use fallback search method (implemented)
-    4. Set DDGS_PROXY environment variable if proxy is needed
+    This implementation includes fallback mechanisms for additional robustness.
+
+    Note: The fallback method is kept for backwards compatibility and additional reliability.
     """
 
     def __init__(self):
@@ -56,7 +54,7 @@ class DuckDuckGoSearch:  # pylint: disable=too-few-public-methods
         """
         try:
             # Try to use duckduckgo-search library for better results
-            from duckduckgo_search import DDGS  # type: ignore  # pylint: disable=import-outside-toplevel
+            from ddgs import DDGS  # type: ignore  # pylint: disable=import-outside-toplevel
 
             results = []
             try:
