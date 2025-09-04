@@ -1,18 +1,16 @@
 # LLM System Architecture Guide
 
-This comprehensive guide covers the complete LLM system architecture for the Deep Search Agents project, including both legacy and current implementations.
+This guide covers the LLM system architecture for the Deep Search Agents project, focusing on the enhanced adapter and factory pattern implementation.
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [System Evolution](#system-evolution)
-3. [Legacy System (tools/llm_factory.py)](#legacy-system)
-4. [Enhanced System (deep_agents_custom/llm/)](#enhanced-system)
-5. [Migration Guide](#migration-guide)
-6. [Comparison](#comparison)
-7. [Configuration](#configuration)
-8. [Best Practices](#best-practices)
-9. [Future Roadmap](#future-roadmap)
+2. [System Architecture](#system-architecture)
+3. [Enhanced System Implementation](#enhanced-system-implementation)
+4. [Usage Examples](#usage-examples)
+5. [Configuration](#configuration)
+6. [Best Practices](#best-practices)
+7. [Future Roadmap](#future-roadmap)
 
 ## Overview
 
@@ -22,75 +20,39 @@ The Deep Search Agents project implements a sophisticated LLM integration system
 - **Adapter Pattern**: Provides a unified interface across different LLM providers
 - **Strategy Pattern**: Enables runtime switching between different LLM providers
 
-The system has evolved from a basic factory implementation to an enhanced adapter-factory hybrid that provides better flexibility, maintainability, and extensibility.
+The system provides a robust, extensible foundation for AI integration with support for multiple LLM providers while maintaining consistent interfaces and intelligent fallback mechanisms.
 
-## System Evolution
+## System Architecture
 
-### Timeline
-1. **Initial Implementation**: Basic factory pattern in `tools/llm_factory.py` (removed)
-2. **Enhanced Version**: Comprehensive adapter system in `deep_agents_custom/llm/`
-3. **Current State**: Enhanced system only - legacy code removed, all agents migrated
+The LLM system is built on a clean, modular architecture that separates concerns and provides flexibility:
 
-### Key Improvements
+```
+deep_agents_custom/llm/
+├── __init__.py                      # Main package exports
+├── interfaces/
+│   ├── __init__.py
+│   └── llm_interface.py             # Abstract interface definition
+├── adapters/
+│   ├── __init__.py
+│   ├── base_adapter.py              # Common adapter functionality
+│   ├── ollama_adapter.py            # Ollama implementation
+│   ├── openai_adapter.py            # OpenAI implementation
+│   └── anthropic_adapter.py         # Anthropic implementation
+└── factory/
+    ├── __init__.py
+    └── llm_factory.py               # Factory pattern implementation
+```
+
+### Core Benefits
 - **Better Abstraction**: Enhanced interface design
 - **Improved Error Handling**: Robust fallback mechanisms
 - **Enhanced Caching**: More efficient adapter reuse
 - **Extensibility**: Easier to add new providers
 - **Modularity**: Clean separation of concerns
 
----
+## Enhanced System Implementation
 
-## Legacy System
-
-> **⚠️ DEPRECATED**: The legacy system in `tools/llm_factory.py` is maintained for backward compatibility but new development should use the enhanced system.
-
-### Architecture
-
-```
-tools/llm_factory.py
-├── BaseLLMClient (Abstract Base Class)
-├── OllamaClient (Local AI)
-├── OpenAIClient (Cloud AI)
-├── AnthropicClient (Cloud AI)
-└── LLMFactory (Factory Class)
-```
-
-### Core Components
-
-#### `BaseLLMClient` (ABC)
-Abstract interface that all LLM providers must implement:
-- `generate(prompt, system_prompt, **kwargs)` - Generate text
-- `get_provider_info()` - Provider metadata
-- `_check_availability()` - Availability validation
-
-#### Provider Implementations
-- **`OllamaClient`**: Local Ollama integration with HTTP API
-- **`OpenAIClient`**: OpenAI API integration with official SDK
-- **`AnthropicClient`**: Anthropic Claude integration with official SDK
-
-#### `LLMFactory`
-Factory class for creating and managing clients:
-- Provider instantiation
-- Client caching
-- Automatic provider selection
-
-### Legacy Usage Examples
-
-> **⚠️ Note**: The following examples are for the deprecated legacy system that has been removed from `deep_agents_custom`. These are shown for historical reference only.
-
-```python
-# This code no longer works - legacy system removed
-# from tools.llm_factory import get_best_llm_client, LLMProvider
-# from tools.summarizer import LLMSummarizer
-
-# Use enhanced system instead (see Enhanced System section)
-```
-
----
-
-## Enhanced System
-
-> **✅ RECOMMENDED**: The enhanced system in `deep_agents_custom/llm/` is the current recommended approach for all new development.
+The enhanced system in `deep_agents_custom/llm/` provides a comprehensive, production-ready LLM integration solution.
 
 ### Architecture
 
@@ -215,110 +177,6 @@ print(result.cited_summary)  # Summary with citations
 
 ---
 
-## Migration Guide
-
-### From Legacy to Enhanced System
-
-#### Step 1: Update Imports
-```python
-# OLD WAY
-from tools.llm_factory import get_best_llm_client, LLMProvider
-
-# NEW WAY
-from llm import get_best_llm, LLMProvider
-```
-
-#### Step 2: Update Client Creation
-```python
-# OLD WAY
-client = get_best_llm_client()
-response = client.generate("prompt", system_prompt="system")
-
-# NEW WAY
-llm = get_best_llm()
-response = llm.generate_with_system("system", "prompt")
-```
-
-#### Step 3: Update Agent Integration
-```python
-# OLD WAY
-class MyAgent:
-    def __init__(self):
-        self.llm_client = get_best_llm_client()
-    
-    def process(self, query):
-        return self.llm_client.generate(query, "You are helpful")
-
-# NEW WAY
-class MyAgent:
-    def __init__(self, llm_provider="auto"):
-        self.llm = get_llm(llm_provider)
-    
-    def process(self, query):
-        return self.llm.generate_with_system("You are helpful", query)
-```
-
-#### Step 4: Update Summarizers
-```python
-# OLD WAY (no longer available)
-# from tools.summarizer import LLMSummarizer
-# summarizer = LLMSummarizer(provider=LLMProvider.OLLAMA)
-
-# NEW WAY  
-from tools.enhanced_summarizer import EnhancedLLMSummarizer
-summarizer = EnhancedLLMSummarizer(provider="ollama")
-
-# OR - Use with existing agents (automatically configured)
-from agents.general_agent import GeneralAgent
-agent = GeneralAgent()  # Uses enhanced summarizer automatically
-```
-
-### Migration Checklist
-
-- [x] ~~Legacy system removed~~ - `tools/llm_factory.py` and `tools/summarizer.py` have been removed
-- [x] ~~Agents updated~~ - All agents now use the enhanced LLM system automatically
-- [ ] Update any custom code imports to use new `llm` package
-- [ ] Replace `generate(prompt, system_prompt)` with `generate_with_system(system, user)`
-- [ ] Update provider specification from enum to string format
-- [ ] Test with existing functionality
-- [ ] Update configuration files if needed
-- [ ] Update documentation references
-
----
-
-## Comparison
-
-| Feature | Legacy System | Enhanced System |
-|---------|---------------|-----------------|
-| **Architecture** | Basic Factory | Adapter + Factory |
-| **Interface** | Simple | Comprehensive |
-| **Error Handling** | Basic | Advanced with retries |
-| **Caching** | Simple | Sophisticated |
-| **Streaming** | Limited | Full support |
-| **Token Estimation** | Basic | Advanced |
-| **Health Monitoring** | Simple | Continuous |
-| **Configuration** | Limited | Flexible |
-| **Extensibility** | Moderate | High |
-| **Performance** | Good | Optimized |
-| **Maintenance** | Higher effort | Lower effort |
-
-### When to Use Each System
-
-#### Use Legacy System When:
-- **Not applicable** - Legacy system has been removed from `deep_agents_custom`
-- Working with other implementations that haven't been migrated
-- Need backward compatibility with external code
-
-#### Use Enhanced System When:
-- **Always** - For `deep_agents_custom` implementation
-- Starting new development
-- Need advanced features (streaming, structured output)
-- Want better error handling and reliability
-- Planning to add new providers
-- Performance optimization is important
-
----
-
 ## Configuration
 
 ### Environment Variables
@@ -345,17 +203,6 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 ### Custom Configuration
 
-#### Legacy System
-```python
-factory = LLMFactory()
-client = factory.create_client(
-    LLMProvider.OLLAMA,
-    model="custom-model",
-    base_url="http://remote-ollama:11434"
-)
-```
-
-#### Enhanced System
 ```python
 adapter = LLMFactory.create_adapter(
     provider="ollama",
@@ -372,9 +219,9 @@ adapter = LLMFactory.create_adapter(
 ## Best Practices
 
 ### 1. Provider Selection
-- **Local Development**: Use Ollama for privacy and cost
-- **Production**: Use OpenAI/Anthropic for reliability
-- **Hybrid**: Auto-detection for flexibility
+- **Local Development**: Use Ollama for privacy and cost efficiency
+- **Production**: Use OpenAI/Anthropic for reliability and performance
+- **Hybrid**: Auto-detection for maximum flexibility and fallback support
 
 ### 2. Error Handling
 ```python
@@ -441,11 +288,11 @@ else:
 
 ## Conclusion
 
-The LLM system architecture provides a robust, flexible foundation for AI integration in the Deep Search Agents project. The enhanced system in `deep_agents_custom/llm/` is now the sole implementation after successful migration and legacy code cleanup.
+The LLM system architecture provides a robust, flexible foundation for AI integration in the Deep Search Agents project. The enhanced system in `deep_agents_custom/llm/` is the sole implementation after successful migration and legacy code cleanup.
 
-All agents in the `deep_agents_custom` implementation automatically use the enhanced LLM system with intelligent fallbacks. The architecture supports both local deployment with Ollama and cloud integration with OpenAI and Anthropic, providing flexibility for different deployment scenarios and requirements.
+All agents in the `deep_agents_custom` implementation automatically use the enhanced LLM system with intelligent fallbacks. The architecture supports local deployment with Ollama, cloud integration with OpenAI and Anthropic, and automatic provider selection for optimal performance.
 
-**Current Status**: ✅ Migration complete - legacy code removed, all components using enhanced system.
+**Current Status**: ✅ Production-ready enhanced system with comprehensive adapter support.
 
 ---
 
@@ -453,5 +300,5 @@ All agents in the `deep_agents_custom` implementation automatically use the enha
 
 - **Enhanced System**: `deep_agents_custom/llm/` (current implementation)
 - **Agent Examples**: `deep_agents_custom/agents/` (general_agent.py, research_agent.py, news_agent.py)
-- **Test Suite**: Available in the enhanced system
-- **Legacy Documentation**: See deprecated `LLM_FACTORY_GUIDE.md` for historical reference
+- **Usage Examples**: See the enhanced system implementation above
+- **Configuration Guide**: Environment variables and provider setup sections

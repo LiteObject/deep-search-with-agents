@@ -12,20 +12,12 @@ import logging
 
 # Conditional imports with error handling
 try:
-    from config.settings import Settings
-except ImportError:
-    Settings = None
+    from tools.enhanced_summarizer import EnhancedLLMSummarizer
 
-try:
-    from tools.llm_factory import LLMProvider
+    LLM_ENHANCED_AVAILABLE = True
 except ImportError:
-    LLMProvider = None
-
-try:
-    from tools.summarizer import LLMSummarizer, SimpleSummarizer
-except ImportError:
-    LLMSummarizer = None
-    SimpleSummarizer = None
+    LLM_ENHANCED_AVAILABLE = False
+    EnhancedLLMSummarizer = None
 
 try:
     from tools.web_search import WebSearchManager
@@ -89,23 +81,48 @@ class BaseAgent(ABC):
                 self.search_manager = WebSearchManager()
 
             if self.summarizer is None:
-                # Try to use LLM summarizer with factory, fallback to simple
+                # Try to use enhanced LLM summarizer, fallback to simple
                 try:
-                    if Settings is None or LLMProvider is None or LLMSummarizer is None:
-                        raise ImportError("LLM components not available")
+                    if not LLM_ENHANCED_AVAILABLE or EnhancedLLMSummarizer is None:
+                        raise ImportError("Enhanced LLM components not available")
 
-                    self.summarizer = LLMSummarizer(
-                        provider=LLMProvider.OLLAMA,
-                        model=Settings.OLLAMA_MODEL,
-                        base_url=Settings.OLLAMA_BASE_URL,
-                    )
+                    # Use enhanced summarizer with auto-selected LLM
+                    self.summarizer = EnhancedLLMSummarizer()
+                    self.logger.info("Initialized with enhanced LLM summarizer")
                 except (ImportError, AttributeError):
-                    if SimpleSummarizer is not None:
-                        self.summarizer = SimpleSummarizer()
-                    else:
-                        self.logger.warning("No summarizer available")
+                    # Create a simple fallback summarizer
+                    self.summarizer = self._create_simple_summarizer()
+                    self.logger.warning("Using simple fallback summarizer")
         except (ImportError, AttributeError, TypeError) as e:
             self.logger.warning("Some tools modules not available: %s", str(e))
+
+    def _create_simple_summarizer(self):
+        """Create a simple fallback summarizer"""
+
+        class SimpleFallbackSummarizer:
+            """Simple fallback summarizer when LLM is not available"""
+
+            def summarize_results(self, results, query: str) -> str:
+                """Create basic summary"""
+                if not results:
+                    return f"No results found for query: {query}"
+
+                summary_lines = [
+                    f"Search Summary for: '{query}'",
+                    f"Total Results: {len(results)}",
+                    "",
+                    "Top Results:",
+                ]
+
+                for i, result in enumerate(results[:5]):
+                    summary_lines.append(f"{i+1}. {result.title}")
+                    summary_lines.append(f"   Source: {result.source}")
+                    summary_lines.append(f"   {result.content[:200]}...")
+                    summary_lines.append("")
+
+                return "\n".join(summary_lines)
+
+        return SimpleFallbackSummarizer()
 
     def _create_search_summary(
         self, *, query: str, summary: str, results_data: Dict[str, Any]

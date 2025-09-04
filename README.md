@@ -18,11 +18,13 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 - **Multi-Agent Architecture**: Specialized agents for research, news, and general searches
 - **Three Implementation Approaches**: Choose from custom, LangChain, or official patterns
 - **Multiple Search Engines**: DuckDuckGo, Tavily, Wikipedia integration
-- **Flexible LLM Integration**: Modular LLM factory supporting Ollama, OpenAI, and Anthropic
+- **Enhanced LLM Integration**: Advanced adapter system supporting Ollama, OpenAI, and Anthropic
 - **Interactive Interfaces**: Both Streamlit web app and CLI available
 - **Privacy-Focused**: Works locally without external APIs, all processing on your machine
 - **High Performance**: Concurrent searches with intelligent result ranking
 - **Extensible Architecture**: Easy to add new agents, search sources, and LLM providers
+
+> **📖 For detailed LLM architecture information, see [LLM_ARCHITECTURE_GUIDE.md](LLM_ARCHITECTURE_GUIDE.md)**
 
 ## Project Structure
 
@@ -46,10 +48,24 @@ deep-search-with-agents/
 │   │   ├── news_agent.py            # News and current events agent  
 │   │   ├── general_agent.py         # General-purpose web search agent
 │   │   └── search_orchestrator.py   # Multi-agent coordination and auto-selection
+│   ├── llm/                         # Enhanced LLM integration system
+│   │   ├── __init__.py              # LLM package exports
+│   │   ├── interfaces/              # LLM interface definitions
+│   │   │   ├── __init__.py          # Interface exports
+│   │   │   └── llm_interface.py     # Abstract LLM interface
+│   │   ├── adapters/                # LLM provider adapters
+│   │   │   ├── __init__.py          # Adapter exports
+│   │   │   ├── base_adapter.py      # Base adapter functionality
+│   │   │   ├── ollama_adapter.py    # Ollama integration
+│   │   │   ├── openai_adapter.py    # OpenAI integration
+│   │   │   └── anthropic_adapter.py # Anthropic Claude integration
+│   │   └── factory/                 # LLM factory pattern implementation
+│   │       ├── __init__.py          # Factory exports
+│   │       └── llm_factory.py       # Enhanced LLM factory
 │   ├── tools/                       # Search and processing tools
 │   │   ├── __init__.py              # Package exports
 │   │   ├── web_search.py            # WebSearchManager, DuckDuckGo, Tavily, Wikipedia
-│   │   └── summarizer.py            # LLMSummarizer and SimpleSummarizer
+│   │   └── enhanced_summarizer.py   # Enhanced LLM-powered summarization
 │   ├── config/                      # Configuration management
 │   │   ├── __init__.py              # Package initialization
 │   │   └── settings.py              # Application settings and validation
@@ -330,8 +346,9 @@ for agent_name, result in agent_results.items():
 - **Wikipedia**: Encyclopedia and reference content (no API key required)
 
 ### AI Summarization
-- **LLMSummarizer**: OpenAI GPT-powered intelligent summarization (requires API key)
-- **SimpleSummarizer**: Fallback text-based summarization (no API key required)
+- **EnhancedLLMSummarizer**: Advanced AI-powered summarization with multiple LLM provider support
+- **Smart Provider Selection**: Automatically chooses best available LLM (Ollama, OpenAI, Anthropic)
+- **Fallback Summarization**: Graceful degradation when LLMs are unavailable
 
 ### Key Classes
 ```python
@@ -362,38 +379,46 @@ class SearchSummary:
 # .env file (copy from .env.example)
 OLLAMA_BASE_URL=http://localhost:11434      # Ollama server URL
 OLLAMA_MODEL=gpt-oss:latest                 # Ollama model for AI summarization
+OPENAI_API_KEY=your_openai_key_here         # OpenAI API key (optional)
+ANTHROPIC_API_KEY=your_anthropic_key_here   # Anthropic API key (optional)
 TAVILY_API_KEY=your_tavily_api_key_here     # For enhanced search results
 LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR)
 ```
 
 ### Configuration Features
-- **Graceful Fallbacks**: System works without Ollama using simple text-based summarization
+- **Enhanced LLM Integration**: Advanced adapter system with multiple provider support
+- **Graceful Fallbacks**: System works without external LLMs using built-in summarization
 - **Multiple Search Engines**: Configurable search engine selection and priority
-- **Flexible LLM Integration**: Modular LLM factory for easy provider switching
-- **Local AI Processing**: Uses Ollama for private, local AI summarization instead of cloud APIs
+- **Automatic Provider Selection**: Intelligent LLM provider detection and fallback
+- **Local AI Processing**: Uses Ollama for private, local AI summarization
 - **Customizable Agents**: Easy to modify agent behavior and specializations
 - **Logging**: Comprehensive logging with configurable levels
 - **Settings Validation**: Automatic configuration validation on startup
 
 ### LLM Provider Support
 
-The system now includes a flexible LLM factory that supports multiple providers:
+The system includes an enhanced LLM adapter system that supports multiple providers:
 
 - **🏠 Ollama** (Default): Local, private, offline AI processing
-- **🌐 OpenAI**: Cloud-based GPT models (API key required)
+- **🌐 OpenAI**: Cloud-based GPT models (API key required)  
 - **🧠 Anthropic**: Claude models (API key required)
 
 **Easy Provider Switching:**
 ```python
-from tools.llm_factory import LLMProvider
-from tools.summarizer import LLMSummarizer
+from llm import get_llm, get_best_llm
+from tools.enhanced_summarizer import EnhancedLLMSummarizer
 
 # Auto-select best available provider
-summarizer = LLMSummarizer()
+llm = get_best_llm()
+summarizer = EnhancedLLMSummarizer()
 
 # Or specify a provider
-summarizer = LLMSummarizer(provider=LLMProvider.OLLAMA)
-summarizer = LLMSummarizer(provider=LLMProvider.OPENAI, model="gpt-4")
+ollama_llm = get_llm("ollama", "gpt-oss:latest")
+openai_llm = get_llm("openai", "gpt-4")
+anthropic_llm = get_llm("anthropic", "claude-3-sonnet-20240229")
+
+# Provider-specific summarizer
+summarizer = EnhancedLLMSummarizer(provider="ollama")
 ```
 
 ## Implementation Choices & Deep Agents Explained
@@ -412,6 +437,7 @@ This project offers **three distinct implementations** of deep search agents, ea
 - **Enhanced Features**: Dynamic year detection, comprehensive error handling
 - **Privacy-First**: Works completely offline with DuckDuckGo
 - **Resource Efficient**: Low memory footprint, fast execution
+- **Latest Architecture**: Enhanced LLM adapter system with multiple provider support
 
 **What makes it "Deep":**
 - Multi-agent orchestration with intelligent agent selection
