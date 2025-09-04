@@ -4,12 +4,12 @@ Provides common functionality and interface for specialized agents.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import logging
 
 # Import common types
-from utils.types import SearchResult, SearchSummary
+from utils.types import SearchResult, SearchSummary  # type: ignore # pylint: disable=import-error
 
 # Conditional imports with error handling
 try:

@@ -39,7 +39,7 @@ class ColoredFormatter(logging.Formatter):
             if sys.platform == "win32":
                 try:
                     # Enable ANSI escape sequence processing on Windows 10+
-                    import ctypes
+                    import ctypes  # pylint: disable=import-outside-toplevel
 
                     kernel32 = ctypes.windll.kernel32
                     kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)

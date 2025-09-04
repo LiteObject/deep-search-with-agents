@@ -65,18 +65,18 @@ class NewsAgent(BaseAgent):
         if self.search_manager is None:
             # Fallback to simple single-engine search
             try:
-                from ..tools.web_search import (
+                from ..tools.web_search import (  # pylint: disable=import-outside-toplevel
                     DuckDuckGoSearch,
-                )  # pylint: disable=import-outside-toplevel
+                )
             except ImportError:
                 # Handle case when running as main script
-                import sys
-                import os
+                import sys  # pylint: disable=import-outside-toplevel
+                import os  # pylint: disable=import-outside-toplevel
 
                 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-                from tools.web_search import (
+                from tools.web_search import (  # pylint: disable=import-outside-toplevel
                     DuckDuckGoSearch,
-                )  # pylint: disable=import-outside-toplevel
+                )
 
             ddg_search = DuckDuckGoSearch()
             results = ddg_search.search(enhanced_query, self.max_results)
