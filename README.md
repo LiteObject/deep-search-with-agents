@@ -26,6 +26,8 @@ Unlike traditional search that returns raw results, **Deep Search Agents** emplo
 - **Colored Logging**: Enhanced console output with color-coded log levels (warnings in yellow, errors in red)
 
 > **For detailed LLM architecture information, see [LLM_ARCHITECTURE_GUIDE.md](LLM_ARCHITECTURE_GUIDE.md)**
+> 
+> **For DuckDuckGo search troubleshooting, see [DUCKDUCKGO_FIX.md](DUCKDUCKGO_FIX.md)**
 
 ## Project Structure
 
@@ -576,6 +578,21 @@ This indicates missing search dependencies.
 ```bash
 pip install ddgs tavily-python anthropic
 # Or reinstall all requirements
+pip install -r requirements.txt
+```
+
+#### **DuckDuckGo Search Error: "unexpected keyword argument 'proxies'"**
+If you see errors like `TypeError: Client.__init__() got an unexpected keyword argument 'proxies'`:
+
+**Solution**: Ensure you're using the correct package:
+```bash
+# Remove old incompatible package
+pip uninstall duckduckgo_search
+
+# Install the working package
+pip install ddgs
+
+# Or reinstall all requirements (already includes ddgs)
 pip install -r requirements.txt
 ```
 
