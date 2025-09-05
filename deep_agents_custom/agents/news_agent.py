@@ -23,7 +23,7 @@ class NewsAgent(BaseAgent):
     Focuses on recent news, breaking stories, and current developments.
     """
 
-    def __init__(self, max_results: int = 12):
+    def __init__(self, max_results: int = 15):
         super().__init__(
             "NewsAgent",
             (
