@@ -18,7 +18,7 @@ st.set_page_config(
     page_title="Deep Search Agents",
     page_icon="🔍",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Setup logging (don't log to file in Streamlit)
@@ -26,7 +26,7 @@ setup_logging(settings.LOG_LEVEL, log_to_file=False)
 logger = get_logger(__name__)
 
 # Initialize session state
-if 'orchestrator' not in st.session_state:
+if "orchestrator" not in st.session_state:
     st.session_state.orchestrator = SearchOrchestrator()
 
 
@@ -34,17 +34,19 @@ def main():
     """Main Streamlit application"""
 
     # Header
-    st.title("🔬 Deep Research Agents")
+    st.title("Deep Research Agents")
     st.markdown("*AI-powered research agents for comprehensive topic analysis*")
 
     # Research description
-    st.info("""
+    st.info(
+        """
     **How it works:** Enter a research topic and our specialized AI agents will:
     • Search multiple sources for relevant information
     • Analyze and synthesize findings from various databases
     • Generate a comprehensive 250-word summary
     • Provide reference links for further reading
-    """)
+    """
+    )
 
     # Sidebar
     create_sidebar()
@@ -62,7 +64,7 @@ def create_sidebar():
     search_mode = st.sidebar.selectbox(
         "Search Mode:",
         ["Auto-Select Agent", "Single Agent", "Multi-Agent", "Comprehensive"],
-        help="Choose how to perform the search"
+        help="Choose how to perform the search",
     )
 
     # Agent selection (for single agent mode)
@@ -71,7 +73,7 @@ def create_sidebar():
         selected_agent = st.sidebar.selectbox(
             "Select Agent:",
             ["Research", "News", "General"],
-            help="Choose which specialized agent to use"
+            help="Choose which specialized agent to use",
         )
 
     # Multi-agent selection (for multi-agent mode)
@@ -81,7 +83,7 @@ def create_sidebar():
             "Select Agents:",
             ["Research", "News", "General"],
             default=["Research", "News", "General"],
-            help="Choose which agents to use"
+            help="Choose which agents to use",
         )
 
     # Store in session state
@@ -97,13 +99,14 @@ def create_sidebar():
         min_value=5,
         max_value=50,
         value=10,
-        help="Maximum number of results per agent"
+        help="Maximum number of results per agent",
     )
     st.session_state.max_results = max_results
 
     # Information section
     st.sidebar.header("ℹ️ About")
-    st.sidebar.markdown("""
+    st.sidebar.markdown(
+        """
     **Deep Research Agents** uses specialized AI agents for comprehensive research:
 
     - 🔬 **Research Agent**: Academic papers, scientific studies
@@ -111,7 +114,8 @@ def create_sidebar():
     - 🌐 **General Agent**: Comprehensive web research
 
     Get 250-word research summaries with reference links for any topic.
-    """)
+    """
+    )
 
     # Agent capabilities
     if st.sidebar.expander("View Agent Capabilities"):
@@ -120,7 +124,8 @@ def create_sidebar():
             st.sidebar.write(f"**{agent_name.title()}**")
             st.sidebar.write(f"- {caps['description']}")
             st.sidebar.write(
-                f"- Supports: {', '.join(caps['supported_queries'][:3])}...")
+                f"- Supports: {', '.join(caps['supported_queries'][:3])}..."
+            )
 
 
 def create_main_interface():
@@ -136,15 +141,17 @@ def create_main_interface():
                 "search_input",
                 placeholder="e.g., quantum computing breakthroughs, sustainable energy solutions",
                 key="search_query",
-                label_visibility="collapsed"
+                label_visibility="collapsed",
             )
 
         with col2:
             search_button = st.button(
-                "🔍 Research", type="primary", use_container_width=True)
+                "🔍 Research", type="primary", use_container_width=True
+            )
 
     # Example research topics
-    st.markdown("""
+    st.markdown(
+        """
     **Example research topics:**
     - 🧬 CRISPR gene editing latest developments
     - 🌱 Renewable energy storage technologies
@@ -152,7 +159,8 @@ def create_main_interface():
     - � Space exploration recent missions
     - 🧠 Neuroplasticity and brain research
     - 🌊 Ocean plastic pollution solutions
-    """)
+    """
+    )
 
     # Perform search
     if search_button and query:
@@ -169,37 +177,37 @@ def perform_search(query: str):
     with st.spinner(f"🔍 Researching {query} using {search_mode.lower()}..."):
         try:
             if search_mode == "Auto-Select Agent":
-                result = st.session_state.orchestrator.search(
-                    query, SearchType.AUTO)
+                result = st.session_state.orchestrator.search(query, SearchType.AUTO)
                 display_single_result(result, "Auto-Selected Research Agent")
 
             elif search_mode == "Single Agent":
                 agent_map = {
                     "Research": SearchType.RESEARCH,
                     "News": SearchType.NEWS,
-                    "General": SearchType.GENERAL
+                    "General": SearchType.GENERAL,
                 }
                 search_type = agent_map[st.session_state.selected_agent]
-                result = st.session_state.orchestrator.search(
-                    query, search_type)
+                result = st.session_state.orchestrator.search(query, search_type)
                 display_single_result(
-                    result, f"{st.session_state.selected_agent} Research Agent")
+                    result, f"{st.session_state.selected_agent} Research Agent"
+                )
 
             elif search_mode == "Multi-Agent":
                 agent_map = {
                     "Research": SearchType.RESEARCH,
                     "News": SearchType.NEWS,
-                    "General": SearchType.GENERAL
+                    "General": SearchType.GENERAL,
                 }
-                agent_types = [agent_map[agent]
-                               for agent in st.session_state.selected_agents]
+                agent_types = [
+                    agent_map[agent] for agent in st.session_state.selected_agents
+                ]
                 results = st.session_state.orchestrator.multi_agent_search(
-                    query, agent_types)
+                    query, agent_types
+                )
                 display_multi_results(results)
 
             elif search_mode == "Comprehensive":
-                results = st.session_state.orchestrator.comprehensive_search(
-                    query)
+                results = st.session_state.orchestrator.comprehensive_search(query)
                 display_comprehensive_results(results)
 
         except (ValueError, ConnectionError) as e:
@@ -207,10 +215,74 @@ def perform_search(query: str):
             logger.error("Search error: %s", e)
 
 
+def _is_valid_key_point(point: str) -> bool:
+    """Check if a key point is valid and meaningful"""
+    if not point or not isinstance(point, str):
+        return False
+
+    # Remove whitespace and convert to lowercase for checking
+    point_clean = point.strip().lower()
+
+    # Filter out empty or very short points
+    if len(point_clean) < 10:
+        return False
+
+    # Filter out common HTML/web elements
+    html_indicators = [
+        "live",
+        "video",
+        "shows",
+        "shop",
+        "stream",
+        "logo",
+        "menu",
+        "navigation",
+        "subscribe",
+        "follow",
+        "share",
+        "click",
+        "button",
+        "link",
+        "href",
+        "www.",
+        ".com",
+        ".org",
+        ".gov",
+        "http",
+        "javascript",
+        "cookie",
+    ]
+
+    # Filter out points that are mostly HTML/web navigation elements
+    if any(indicator in point_clean for indicator in html_indicators):
+        # Allow if it contains substantive content (more than just navigation)
+        substantive_words = len(
+            [
+                word
+                for word in point_clean.split()
+                if len(word) > 3 and word not in html_indicators
+            ]
+        )
+        if substantive_words < 3:
+            return False
+
+    # Filter out points that are just lists of short words
+    words = point_clean.split()
+    if len(words) < 5:  # Too short to be meaningful
+        return False
+
+    # Filter out points that are mostly single-character items or numbers
+    meaningful_words = [word for word in words if len(word) > 2 and not word.isdigit()]
+    if len(meaningful_words) < 3:
+        return False
+
+    return True
+
+
 def display_single_result(result, agent_name: str):
     """Display single agent search result with research focus"""
 
-    st.header(f"🔬 Research Results: {result.query}")
+    st.header(f"Research Results: {result.query}")
 
     # Research metrics
     col1, col2, col3 = st.columns(3)
@@ -222,53 +294,85 @@ def display_single_result(result, agent_name: str):
         st.metric("🔍 Agent Used", agent_name)
 
     # Main research summary (250 words)
-    st.subheader("📋 Research Summary")
+    st.subheader("Research Summary")
 
     # Generate or display a research-focused summary
-    if hasattr(result, 'summary') and result.summary:
-        # Ensure summary is approximately 250 words
-        words = result.summary.split()
-        if len(words) > 280:
-            # Truncate to approximately 250 words and add proper ending
-            summary_250 = ' '.join(words[:250])
-            # Find the last complete sentence
-            last_period = summary_250.rfind('.')
-            if last_period > 0:
-                summary_250 = summary_250[:last_period + 1]
-            else:
-                summary_250 += "..."
+    if hasattr(result, "summary") and result.summary:
+        # Clean up the summary text
+        summary_text = result.summary
+
+        # Check if the summary contains markdown table formatting
+        if "|" in summary_text and "---|" in summary_text:
+            # The summary contains a markdown table, render it properly
+            st.markdown(summary_text)
+            # For tables, count total words in the content
+            word_count = len(summary_text.replace("|", " ").replace("-", " ").split())
         else:
-            summary_250 = result.summary
+            # Regular text summary - ensure approximately 250 words
+            words = summary_text.split()
+            if len(words) > 280:
+                # Truncate to approximately 250 words and add proper ending
+                summary_250 = " ".join(words[:250])
+                # Find the last complete sentence
+                last_period = summary_250.rfind(".")
+                if last_period > 0:
+                    summary_250 = summary_250[: last_period + 1]
+                else:
+                    summary_250 += "..."
+            else:
+                summary_250 = summary_text
 
-        st.write(summary_250)
+            # Display in a more readable format with proper formatting
+            with st.container():
+                st.markdown(
+                    f"""
+                <div style="background-color: #f0f2f6; color: #262730; padding: 20px; border-radius: 10px; line-height: 1.6; border: 1px solid #e0e0e0;">
+                {summary_250}
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
 
-        # Word count display
-        word_count = len(summary_250.split())
+            # Word count display
+            word_count = len(summary_250.split())
+
         st.caption(f"📝 Summary: {word_count} words")
     else:
         st.warning("No research summary available for this topic.")
 
     # Key insights (if available)
-    if hasattr(result, 'key_points') and result.key_points:
-        st.subheader("🔍 Key Research Findings")
-        for i, point in enumerate(result.key_points[:5], 1):
-            st.write(f"• {point}")
+    if hasattr(result, "key_points") and result.key_points:
+        st.subheader("Key Research Findings")
+
+        # Filter and clean key points
+        valid_points = []
+        for point in result.key_points[:10]:  # Check more points to find valid ones
+            if _is_valid_key_point(point):
+                valid_points.append(point)
+                if len(valid_points) >= 5:  # Limit to 5 valid points
+                    break
+
+        if valid_points:
+            for i, point in enumerate(valid_points, 1):
+                st.write(f"• {point}")
+        else:
+            st.info("Key research findings are integrated into the summary above.")
 
     # Reference links for further reading
-    st.subheader("🔗 Reference Links for Further Information")
+    st.subheader("Reference Links for Further Information")
 
-    if hasattr(result, 'results') and result.results:
+    if hasattr(result, "results") and result.results:
         # Display top sources with titles and links
         st.write("**Primary Sources:**")
         for i, source in enumerate(result.results[:8], 1):
-            if hasattr(source, 'url') and hasattr(source, 'title'):
+            if hasattr(source, "url") and hasattr(source, "title"):
                 st.markdown(f"{i}. **[{source.title}]({source.url})**")
-                if hasattr(source, 'source'):
+                if hasattr(source, "source"):
                     st.caption(f"   Source: {source.source}")
-            elif hasattr(source, 'url'):
+            elif hasattr(source, "url"):
                 st.markdown(f"{i}. **[View Source]({source.url})**")
 
-    elif hasattr(result, 'sources') and result.sources:
+    elif hasattr(result, "sources") and result.sources:
         # Fallback to basic source links
         st.write("**Source Links:**")
         for i, source_url in enumerate(result.sources[:8], 1):
@@ -305,8 +409,7 @@ def display_multi_results(results: Dict[str, Any]):
 
     # Individual agent results
     for agent_name, result in results.items():
-        expander = st.expander(
-            f"🔍 {agent_name.title()} Agent Results", expanded=True)
+        expander = st.expander(f"🔍 {agent_name.title()} Agent Results", expanded=True)
         with expander:
             display_single_result(result, f"{agent_name.title()} Agent")
 
@@ -317,34 +420,34 @@ def display_comprehensive_results(results: Dict[str, Any]):
     st.header("🎯 Comprehensive Search Results")
 
     # Overall metrics
-    analysis = results['analysis']
-    _display_overall_metrics(analysis, results['total_search_time'])
+    analysis = results["analysis"]
+    _display_overall_metrics(analysis, results["total_search_time"])
 
     # Analysis chart
-    if len(results['agent_results']) > 1:
+    if len(results["agent_results"]) > 1:
         _display_performance_analysis(analysis)
 
     # Combined insights
-    if analysis['combined_insights']:
+    if analysis["combined_insights"]:
         st.subheader("🎯 Combined Key Insights")
-        for i, insight in enumerate(analysis['combined_insights'], 1):
+        for i, insight in enumerate(analysis["combined_insights"], 1):
             st.write(f"{i}. {insight}")
 
     # Individual agent results
-    _display_agent_tabs(results['agent_results'])
+    _display_agent_tabs(results["agent_results"])
 
 
 def _display_overall_metrics(analysis: Dict[str, Any], total_search_time: float):
     """Display overall metrics for comprehensive results"""
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Total Sources", analysis['total_sources'])
+        st.metric("Total Sources", analysis["total_sources"])
     with col2:
-        st.metric("Unique Sources", analysis['unique_source_count'])
+        st.metric("Unique Sources", analysis["unique_source_count"])
     with col3:
         st.metric("Search Time", format_search_time(total_search_time))
     with col4:
-        overlap_pct = analysis['source_overlap_ratio'] * 100
+        overlap_pct = analysis["source_overlap_ratio"] * 100
         st.metric("Source Overlap", f"{overlap_pct:.1f}%")
 
 
@@ -353,19 +456,18 @@ def _display_performance_analysis(analysis: Dict[str, Any]):
     st.subheader("📊 Agent Performance Analysis")
 
     # Create performance data
-    perf_data = _create_performance_data(analysis['agent_performance'])
+    perf_data = _create_performance_data(analysis["agent_performance"])
     df = pd.DataFrame(perf_data)
 
     # Create charts
     col1, col2 = st.columns(2)
 
     with col1:
-        fig1 = px.bar(df, x='Agent', y='Results', title='Results by Agent')
+        fig1 = px.bar(df, x="Agent", y="Results", title="Results by Agent")
         st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
-        fig2 = px.bar(df, x='Agent', y='Time (s)',
-                      title='Search Time by Agent')
+        fig2 = px.bar(df, x="Agent", y="Time (s)", title="Search Time by Agent")
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -373,13 +475,14 @@ def _create_performance_data(agent_performance: Dict[str, Any]) -> List[Dict[str
     """Create performance data for charts"""
     perf_data = []
     for agent_name, perf in agent_performance.items():
-        perf_data.append({
-            'Agent': agent_name.title(),
-            'Results': perf['result_count'],
-            'Time (s)': perf['search_time'],
-            'Results/Time': (
-                perf['result_count'] / max(perf['search_time'], 0.1))
-        })
+        perf_data.append(
+            {
+                "Agent": agent_name.title(),
+                "Results": perf["result_count"],
+                "Time (s)": perf["search_time"],
+                "Results/Time": (perf["result_count"] / max(perf["search_time"], 0.1)),
+            }
+        )
     return perf_data
 
 
@@ -387,8 +490,7 @@ def _display_agent_tabs(agent_results: Dict[str, Any]):
     """Display individual agent results in tabs"""
     st.subheader("🤖 Detailed Agent Results")
 
-    tabs = st.tabs([f"{name.title()} Agent"
-                   for name in agent_results.keys()])
+    tabs = st.tabs([f"{name.title()} Agent" for name in agent_results.keys()])
 
     for tab, (agent_name, result) in zip(tabs, agent_results.items()):
         with tab:
