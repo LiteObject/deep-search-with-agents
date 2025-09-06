@@ -16,7 +16,7 @@ from utils.helpers import format_search_time  # type: ignore # pylint: disable=i
 # Configure page
 st.set_page_config(
     page_title="Deep Search Agents",
-    page_icon="🔍",
+    page_icon="✦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -40,7 +40,7 @@ def main():
     # Research description
     st.info(
         """
-    **How it works:** Enter a research topic and our specialized AI agents will:
+    **How it works:** Enter a research topic and our specialized AI agents wil:
     • Search multiple sources for relevant information
     • Analyze and synthesize findings from various databases
     • Generate a comprehensive 250-word summary
